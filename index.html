@@ -104,7 +104,7 @@
     .nav-cta-txt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;text-align:right;line-height:1.4;max-width:160px;color:inherit}
     .nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--ink);display:grid;place-items:center;color:var(--cream);font-size:10px;font-family:'JetBrains Mono',monospace}
     #navbar.dark-nav .nav-avatar{background:var(--cream);color:var(--ink)}
-    .nav-auth-btns{display:flex;align-items:center;gap:8px}
+    .nav-auth-btns{display:none}
     .nav-btn-login{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;padding:8px 16px;border-radius:9999px;border:1px solid rgba(10,10,10,.25);background:transparent;color:var(--ink);text-decoration:none;transition:opacity .2s,background .2s}
     .nav-btn-login:hover{background:rgba(10,10,10,.06);opacity:1}
     .nav-btn-registro{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;padding:8px 16px;border-radius:9999px;border:none;background:var(--ink);color:var(--cream);text-decoration:none;transition:opacity .2s}
@@ -135,8 +135,8 @@
     .pill-irid-line:hover::after{transform:scaleX(1)}
 
     /* SECTION WRAPPERS */
-    .s-light{background:var(--cream);color:var(--ink);position:relative}
-    .s-dark{background:var(--ink);color:var(--cream);position:relative}
+    .s-light{background:var(--cream);color:var(--ink);position:relative;overflow:hidden}
+    .s-dark{background:var(--ink);color:var(--cream);position:relative;overflow:hidden}
 
     /* MARQUEE */
     .mq-track{display:flex;gap:48px;white-space:nowrap;animation:marquee 32s linear infinite}
@@ -411,20 +411,24 @@
     #toast-container{position:fixed;bottom:24px;right:24px;z-index:9000;display:flex;flex-direction:column;gap:8px}
     .toast{background:var(--ink);color:var(--cream);padding:13px 20px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase}
 
-    /* RESPONSIVE */
-    /* ── RESPONSIVE TOKENS ──────────────────────────────────────── */
+    /* ═══════════════════════════════════════════════════
+       RESPONSIVE SYSTEM — REFORMA®
+       ═══════════════════════════════════════════════════ */
+
+    /* ── TOKENS ───────────────────────────────────────── */
     :root { --pad-x: 40px; }
     @media(max-width:900px){ :root{ --pad-x: 24px; } }
     @media(max-width:600px){ :root{ --pad-x: 16px; } }
 
-    /* ── MENU DROPDOWN — full-width en mobile ───────────────────── */
+    /* ── MENU DROPDOWN — full-width en mobile ─────────── */
     @media(max-width:600px){
       #menu-dd{left:0;right:0;width:100%;transform:translateY(-12px);border-radius:0}
       #menu-dd.open{transform:translateY(0)}
     }
 
-    /* ── TABLET ≤900px ──────────────────────────────────────────── */
+    /* ── TABLET ≤900px ────────────────────────────────── */
     @media(max-width:900px){
+
       /* Navbar */
       .nav-cta-txt,.nav-avatar{ display:none }
 
@@ -439,11 +443,24 @@
       .hero-desc-col{ border-right:none; border-bottom:1px solid var(--line); padding:20px var(--pad-x) 28px }
       .hero-cta-col{ padding:20px var(--pad-x) 28px }
 
-      /* Secciones internas */
+      /* Grids de secciones — colapsar a columna única */
+      .grid-about{ grid-template-columns:1fr !important; gap:32px !important }
+      .grid-services-header{ grid-template-columns:1fr !important; gap:24px !important; padding:48px 0 36px !important }
+      .grid-why{ grid-template-columns:1fr !important; gap:36px !important }
+      .grid-metrics{ grid-template-columns:1fr 1fr !important }
+      .grid-metrics .metric-cell{ border-right:none !important; border-bottom:1px solid var(--line) }
+
+      /* Servicios */
       .svc-row{ grid-template-columns:40px 1fr }
       .svc-thumb,.svc-tag{ display:none }
+
+      /* Equipo */
       .team-grid{ grid-template-columns:1fr 1fr }
+
+      /* Proceso */
       .proc-grid{ grid-template-columns:1fr 1fr }
+
+      /* Precios */
       .price-grid{ grid-template-columns:1fr }
       .price-card{ padding:32px var(--pad-x) }
 
@@ -458,7 +475,7 @@
       .auth-container{ grid-template-columns:1fr }
       .auth-left-admin{ display:none }
 
-      /* Admin (legacy en index) */
+      /* Admin */
       .admin-section-grid{ grid-template-columns:1fr }
       .admin-stats-grid{ grid-template-columns:1fr 1fr }
       .payment-grid{ grid-template-columns:1fr 1fr }
@@ -468,26 +485,48 @@
       .viewer-layout{ grid-template-columns:1fr }
       .viewer-sidebar{ display:none }
 
+      /* Sección HABLEMOS */
+      .grid-contact{ grid-template-columns:1fr !important; gap:36px !important }
+
       /* Footer */
       .footer-main{ padding:40px var(--pad-x) 28px }
       .footer-bar{ padding:14px var(--pad-x); flex-direction:column; gap:8px; text-align:center }
       #metodos-pago{ padding:48px var(--pad-x) }
     }
 
-    /* ── MOBILE ≤600px ──────────────────────────────────────────── */
+    /* ── MOBILE ≤600px ────────────────────────────────── */
     @media(max-width:600px){
-      /* Navbar: solo logo + trigger */
-      .nav-inner{ grid-template-columns:1fr auto }
-      .nav-auth-btns{ display:none }
 
-      /* Hero */
+      /* Navbar: logo + menú en una sola fila */
+      .nav-inner{
+        grid-template-columns:1fr auto;
+        height:auto;
+        padding:0 var(--pad-x);
+      }
+      .nav-right{ display:none }
+
+      /* Hero: ocultar stat col en mobile (datos aparecen en sección métricas abajo) */
+      .hero-stat-col{ display:none }
+      .hero-main-col{ padding-top:32px }
+      #hero{ min-height:calc(100dvh - 64px); margin-top:64px }
       .hero-hl{ font-size:clamp(28px,9vw,48px); padding:0 var(--pad-x) }
-      .hero-stat-col{ padding-top:80px }
+
+      /* Sección HABLEMOS */
+      .grid-contact{ grid-template-columns:1fr !important; gap:36px !important }
+
+      /* Footer */
+      .grid-footer{ grid-template-columns:1fr !important; gap:24px !important }
+      .footer-links{ justify-content:flex-start !important; border-top:1px solid var(--line); padding-top:20px; margin-top:4px }
+      .footer-back-top{ margin-left:auto }
+
+      /* Grids de secciones en mobile */
+      .grid-metrics{ grid-template-columns:1fr !important }
+      .grid-metrics .metric-cell{ border-right:none !important; border-bottom:1px solid var(--line) }
 
       /* Servicios */
       .svc-row{ gap:12px; padding:20px 0 }
 
-      /* Team */
+      /* Equipo */
       .team-grid{ grid-template-columns:1fr 1fr }
 
       /* Precios */
@@ -496,13 +535,28 @@
       /* Formularios */
       .form-card{ padding:32px var(--pad-x) }
 
+      /* Títulos grandes — reducir clamp mínimo */
+      .grid-about h2{ font-size:clamp(28px,8vw,76px) !important; word-break:break-word }
+      .grid-services-header h2{ font-size:clamp(24px,7vw,60px) !important; word-break:break-word }
+      .grid-why h2{ font-size:clamp(36px,10vw,96px) !important; word-break:break-word }
+      .scroll-wipe-text{ word-break:break-word; overflow-wrap:break-word }
+
+      /* Barras de estadísticas */
+      .bar-row{ gap:10px }
+      .bar-lbl{ font-size:9px }
+
       /* Footer */
       .footer-main{ padding:32px var(--pad-x) 20px }
       .footer-bar{ padding:12px var(--pad-x) }
     }
 
-    /* ── SMALL MOBILE ≤480px ────────────────────────────────────── */
+    /* ── SMALL MOBILE ≤480px ──────────────────────────── */
     @media(max-width:480px){
+      /* Títulos grandes en secciones oscuras */
+      .grid-about h2{ font-size:clamp(26px,8vw,52px) !important; word-break:break-word }
+      .grid-services-header h2{ font-size:clamp(22px,7vw,44px) !important; word-break:break-word }
+      .grid-why h2{ font-size:clamp(32px,10vw,60px) !important; word-break:break-word }
+      .scroll-wipe-text{ word-break:break-word }
       .hero-hl{ font-size:clamp(24px,10vw,40px); letter-spacing:-.03em; line-height:.95 }
       .hero-stat-num{ font-size:clamp(32px,10vw,48px) }
       .team-grid{ grid-template-columns:1fr }
@@ -510,8 +564,9 @@
       .admin-stats-grid{ grid-template-columns:1fr }
       .payment-grid{ grid-template-columns:1fr }
       .price-card{ padding:28px var(--pad-x) }
-      .acc-trigger{ padding:14px 0 }
-      .acc-content{ padding:0 32px 14px }
+      .acc-trigger{ padding:14px 0; gap:8px }
+      .acc-content{ padding:0 28px 14px }
+      .acc-q{ font-size:13px }
     }
 
     /* ═══════════════════════════════════════════════════
@@ -861,7 +916,10 @@
           <div>
             <div class="ml" style="margin-bottom:14px;font-size:8px;">UNA LLAMADA DE 30 MIN PARA CLARIFICAR TU CAMINO. <strong style="color:var(--ink)">CERO COMPROMISOS.</strong></div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <a href="#/registro" class="pill-dark" style="justify-content:center;width:100%;box-sizing:border-box;">ÚNETE A LA REFORMA</a>
+              <div style="display:flex;gap:10px;">
+                <a href="#/login" class="pill-light" style="justify-content:center;flex:1;box-sizing:border-box;">INGRESAR</a>
+                <a href="#/registro" class="pill-dark" style="justify-content:center;flex:1;box-sizing:border-box;">REGISTRARSE</a>
+              </div>
               <a href="#/cursos" class="pill-light" style="justify-content:center;width:100%;box-sizing:border-box;">VER PROGRAMAS →</a>
             </div>
           </div>
@@ -882,10 +940,10 @@
 
   <!-- ABOUT DARK STRIP -->
   <section class="s-dark" style="padding:80px 0;">
-    <div style="max-width:1440px;margin:0 auto;padding:0 40px;">
+    <div class="section-inner" style="max-width:1440px;margin:0 auto;padding:0 var(--pad-x);">
       <div class="gm" style="top:-18px;left:40px;color:var(--cream)"></div>
       <div class="gm" style="top:-18px;right:40px;color:var(--cream)"></div>
-      <div style="display:grid;grid-template-columns:1fr 2fr;gap:56px;align-items:start;">
+      <div class="grid-about" style="display:grid;grid-template-columns:1fr 2fr;gap:56px;align-items:start;">
         <div>
           <div class="sid ml" style="color:#555;margin-bottom:20px;">01 QUIÉNES SOMOS</div>
           <div class="ml" style="color:#555;font-size:9px;line-height:2;margin-bottom:32px;">CÓMO TRANSFORMAMOS VIDAS — 12 SEM.</div>
@@ -912,8 +970,8 @@
 
   <!-- SERVICES DARK -->
   <section class="s-dark" style="padding:0 0 72px;border-top:1px solid rgba(255,255,255,.06);">
-    <div style="max-width:1440px;margin:0 auto;padding:0 40px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:end;padding:72px 0 52px;">
+    <div class="section-inner" style="max-width:1440px;margin:0 auto;padding:0 var(--pad-x);">
+      <div class="grid-services-header" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:end;padding:72px 0 52px;">
         <div>
           <div class="sid ml" style="color:#555;margin-bottom:18px;">02 PROGRAMAS</div>
           <h2 class="scroll-wipe-text" style="font-size:clamp(28px,4vw,60px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.94;">
@@ -952,9 +1010,9 @@
   </section>
 
   <!-- WHY US CREAM -->
-  <section class="s-light" style="padding:80px 40px;">
+  <section class="s-light" style="padding:80px var(--pad-x);">
     <div style="max-width:1440px;margin:0 auto;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
+      <div class="grid-why" style="display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
         <div>
           <div class="sid ml" style="margin-bottom:18px;">03 ¿POR QUÉ NOSOTROS?</div>
           <h2 class="scroll-wipe-text" style="font-size:clamp(44px,6vw,96px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.92;">
@@ -973,8 +1031,8 @@
         </div>
       </div>
       <!-- Metrics -->
-      <div style="margin-top:72px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);">
-        <div style="padding:28px;border-right:1px solid var(--line);text-align:center;"><div style="font-size:60px;font-weight:900;letter-spacing:-.05em;line-height:1;" class="count-up" data-target="70" data-suffix="+">0+</div><div class="ml" style="margin-top:6px;">PROYECTOS COMPLETADOS</div></div>
+      <div class="grid-metrics" style="margin-top:72px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);">
+        <div class="metric-cell" style="padding:28px;border-right:1px solid var(--line);text-align:center;"><div style="font-size:60px;font-weight:900;letter-spacing:-.05em;line-height:1;" class="count-up" data-target="70" data-suffix="+">0+</div><div class="ml" style="margin-top:6px;">PROYECTOS COMPLETADOS</div></div>
         <div style="padding:28px;border-right:1px solid var(--line);text-align:center;"><div style="font-size:60px;font-weight:900;letter-spacing:-.05em;line-height:1;" class="count-up" data-target="4.9" data-dec="1">0</div><div class="ml" style="margin-top:6px;">CALIFICACIÓN / 5</div></div>
         <div style="padding:28px;text-align:center;"><div style="font-size:60px;font-weight:900;letter-spacing:-.05em;line-height:1;" class="count-up" data-target="230">0</div><div class="ml" style="margin-top:6px;">RESEÑAS VERIFICADAS</div></div>
       </div>
@@ -982,7 +1040,7 @@
   </section>
 
   <!-- PROCESS CREAM -->
-  <section class="s-light" style="padding:0 40px 72px;border-top:1px solid var(--line);">
+  <section class="s-light" style="padding:0 var(--pad-x) 72px;border-top:1px solid var(--line);">
     <div style="max-width:1440px;margin:0 auto;">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;padding-top:40px;margin-bottom:40px;flex-wrap:wrap;gap:20px;">
         <div><div class="sid ml" style="margin-bottom:10px;">05 CÓMO LO HACEMOS</div><h2 class="scroll-wipe-text" style="font-size:clamp(26px,3.5vw,52px);font-weight:900;letter-spacing:-.03em;text-transform:uppercase;line-height:.94;">EL CAMINO RÁPIDO<br/>HACIA EL ÉXITO REAL</h2></div>
@@ -1002,7 +1060,7 @@
   </section>
 
   <!-- COST OF WAITING -->
-  <section class="s-light" style="padding:72px 40px;border-top:1px solid var(--line);">
+  <section class="s-light" style="padding:72px var(--pad-x);border-top:1px solid var(--line);">
     <div style="max-width:1440px;margin:0 auto;">
       <div class="sid ml" style="margin-bottom:18px;">POR QUÉ ESPERAR DUELE</div>
       <h2 class="scroll-wipe-text" style="font-size:clamp(26px,4vw,60px);font-weight:900;letter-spacing:-.03em;text-transform:uppercase;line-height:1;margin-bottom:44px;">CUANTO MÁS ESPERAS,<br/>MÁS TE CUESTA<br/>PONERTE AL DÍA.</h2>
@@ -1017,7 +1075,7 @@
 
   <!-- TEAM -->
   <section class="s-light" style="padding:72px 0;border-top:1px solid var(--line);">
-    <div style="max-width:1440px;margin:0 auto;padding:0 40px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div class="team-header" style="max-width:1440px;margin:0 auto;padding:0 var(--pad-x) 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
       <div><div class="sid ml" style="margin-bottom:8px;">09 EL EQUIPO</div><h2 style="font-size:clamp(24px,3vw,44px);font-weight:900;letter-spacing:-.03em;text-transform:uppercase;">EL EQUIPO</h2></div>
       <div class="ml" style="font-size:8px;">◉ REFORMA®</div>
     </div>
@@ -1037,7 +1095,7 @@
 
   <!-- PRICING DARK -->
   <section class="s-dark" style="padding:72px 0;border-top:1px solid rgba(255,255,255,.06);">
-    <div style="max-width:1440px;margin:0 auto;padding:0 40px 40px;">
+    <div class="section-inner" style="max-width:1440px;margin:0 auto;padding:0 var(--pad-x) 40px;">
       <div style="text-align:center;margin-bottom:44px;">
         <div class="ml" style="color:#555;margin-bottom:8px;">◉ REFORMA®</div>
         <h2 style="font-size:clamp(36px,6vw,88px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;color:var(--cream);line-height:.9;">INVERSIÓN.</h2>
@@ -1067,7 +1125,7 @@
   </section>
 
   <!-- FAQ -->
-  <section class="s-light" style="padding:72px 40px;border-top:1px solid var(--line);">
+  <section class="s-light" style="padding:72px var(--pad-x);border-top:1px solid var(--line);">
     <div style="max-width:1440px;margin:0 auto;">
       <div class="sid ml" style="margin-bottom:14px;">12 AYUDA E INFO</div>
       <h2 style="font-size:clamp(36px,5vw,76px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;margin-bottom:44px;">FAQ</h2>
@@ -1088,8 +1146,9 @@
   </section>
 
   <!-- CONTACT -->
-  <section class="s-light" style="padding:72px 40px;border-top:1px solid var(--line);">
-    <div style="max-width:1440px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
+  <section class="s-light" style="padding:72px var(--pad-x);border-top:1px solid var(--line);">
+    <div style="max-width:1440px;margin:0 auto;" class="grid-contact-outer">
+    <div class="grid-contact" style="display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;">
       <div>
         <div class="sid ml" style="margin-bottom:14px;">13 ¿LISTO PARA EMPEZAR?</div>
         <h2 style="font-size:clamp(32px,5vw,76px);font-weight:900;letter-spacing:-.04em;text-transform:uppercase;line-height:.92;margin-bottom:18px;">HABLEMOS</h2>
@@ -1102,6 +1161,7 @@
         <a href="#/registro" class="pill-dark pill-irid-line">HABLEMOS</a>
         <p class="ml" style="margin-top:10px;font-size:8px;">AL ENVIAR, ACEPTAS NUESTROS TÉRMINOS. BASADOS EN MARACAY, VENEZUELA.</p>
       </div>
+    </div>
     </div>
   </section>
 
@@ -1142,16 +1202,16 @@
   <footer id="site-footer">
     <div class="footer-irid"></div>
     <div class="footer-main">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;">
+      <div class="grid-footer" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;">
         <div>
           <div class="ml" style="margin-bottom:6px;">(0412) 555-2468</div>
           <div class="footer-contact">REFORMA@ACADEMIA.COM</div>
         </div>
-        <div style="display:flex;justify-content:flex-end;align-items:flex-end;gap:20px;flex-wrap:wrap;">
+        <div class="footer-links" style="display:flex;justify-content:flex-end;align-items:flex-end;gap:20px;flex-wrap:wrap;">
           <a href="#" class="ml" style="text-decoration:none;border-bottom:1px solid var(--muted);padding-bottom:2px;">IG</a>
           <a href="#" class="ml" style="text-decoration:none;border-bottom:1px solid var(--muted);padding-bottom:2px;">YT</a>
           <a href="#" class="ml" style="text-decoration:none;border-bottom:1px solid var(--muted);padding-bottom:2px;">TW</a>
-          <a href="#/" class="ml" style="text-decoration:none;color:var(--ink);">VOLVER ARRIBA ↑</a>
+          <a href="#/" class="ml footer-back-top" style="text-decoration:none;color:var(--ink);">VOLVER ARRIBA ↑</a>
         </div>
       </div>
     </div>
