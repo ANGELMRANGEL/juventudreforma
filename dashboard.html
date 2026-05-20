@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>REFORMA® | Panel de Alumnos</title>
+  
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◉</text></svg>" />
+  
+  <style>
+    :root{--font-display:'Helvetica Neue','Arial Black',sans-serif;--ink:#0A0A0A;--cream:#EDEDEB;--muted:#6B6B6B;--line:#D9D9D9;--accent:#E63946;}
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    html{overflow-x:hidden;max-width:100%}
+    body{background:var(--cream);color:var(--ink);font-family:var(--font-display);margin:0;padding:0;overflow-x:hidden;max-width:100%;}
+    
+    /* LOADER GLOBAL */
+    #global-loader { position: fixed; inset: 0; background: var(--cream); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s; }
+    #global-loader.hidden { opacity: 0; pointer-events: none; }
+    .loader-spinner { width: 24px; height: 24px; border: 2px solid var(--line); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ANIMATED FILM GRAIN */
+    .grain { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 1; pointer-events: none; opacity: 0.06; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 256px; animation: grain-dance 0.4s steps(4) infinite; }
+    @keyframes grain-dance { 0% { transform: translate(0, 0); } 25% { transform: translate(-2%, -2%); } 50% { transform: translate(1%, -1%); } 75% { transform: translate(-1%, 2%); } 100% { transform: translate(0, 0); } }
+
+    /* UTILS & TYPOGRAPHY */
+    .ml{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+    .sid{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .sid::before{content:'●';font-size:7px}
+    
+    /* BUTTONS */
+    .pill-dark{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:var(--cream);border-radius:9999px;padding:10px 24px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;border:none;transition:opacity .2s;cursor:pointer;}
+    .pill-dark:hover{opacity:.8}
+    .pill-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--ink);border-radius:9999px;padding:10px 24px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;border:1px solid var(--line);transition:border-color .2s;cursor:pointer;}
+    .pill-outline:hover{border-color:var(--ink)}
+
+    /* CATEGORY FILTERS */
+    .category-filters { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; margin-bottom: 24px; -ms-overflow-style: none; scrollbar-width: none; }
+    .category-filters::-webkit-scrollbar { display: none; }
+    .cat-pill { background: rgba(0,0,0,0.05); color: var(--ink); border: none; padding: 10px 20px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .cat-pill:hover { background: rgba(0,0,0,0.1); }
+    .cat-pill.active { background: var(--ink); color: var(--cream); font-weight: 700; }
+
+    /* NUEVOS filter pill — accent color */
+    .cat-pill[data-filter="nuevos"] { color: var(--accent); border: 1px solid rgba(230,57,70,0.3); }
+    .cat-pill[data-filter="nuevos"].active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ESTRENO cards — dark/inverted */
+    .yt-card.estreno { background: var(--ink); border-radius: 16px; overflow: hidden; }
+    .yt-card.estreno .yt-thumb { border-radius: 0; margin-bottom: 0; }
+    .yt-card.estreno .yt-meta { padding: 14px 16px 0; }
+    .yt-card.estreno .yt-info h3 { color: var(--cream); }
+    .yt-card.estreno .yt-info p { color: rgba(255,255,255,0.45); }
+    .yt-card.estreno .yt-avatar { background: var(--cream); color: var(--ink); }
+    .yt-card.estreno > .pill-dark { background: var(--accent); margin: 12px 16px 16px; width: calc(100% - 32px); }
+    .yt-card.hidden-filter { display: none !important; }
+
+    /* NUEVOS banner when filter active */
+    #nuevos-banner { display: none; padding: 16px 20px; background: var(--ink); color: var(--cream); border-radius: 12px; margin-bottom: 24px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
+    #nuevos-banner.visible { display: flex; align-items: center; gap: 12px; }
+    #nuevos-banner .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* APP SHELL */
+    #app-topbar { position: fixed; top: 0; left: 0; right: 0; height: 64px; border-bottom: 1px solid var(--line); background: var(--cream); z-index: 500; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+    #app-sidebar { position: fixed; top: 64px; left: 0; bottom: 0; width: 240px; border-right: 1px solid var(--line); background: var(--cream); z-index: 490; display: flex; flex-direction: column; padding: 24px 16px; overflow-y: auto; overflow-x: hidden; gap: 32px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease; }
+    
+    .sidebar-section { display: flex; flex-direction: column; gap: 4px; }
+    .sidebar-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; padding-left: 12px; transition: opacity 0.2s; white-space: nowrap; }
+    
+    .nav-item-app { display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 8px; cursor: pointer; color: var(--ink); text-decoration: none; transition: background 0.2s, justify-content 0.3s; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; }
+    .nav-item-app:hover { background: rgba(0,0,0,0.04); }
+    .nav-item-app.active { background: rgba(0,0,0,0.08); font-weight: 700; }
+    .nav-item-app svg { color: var(--muted); transition: color 0.2s; flex-shrink: 0; }
+    .nav-item-app.active svg { color: var(--ink); }
+
+    body.sidebar-collapsed #app-sidebar { width: 76px; padding: 24px 12px; }
+    body.sidebar-collapsed .sidebar-title { opacity: 0; height: 0; margin: 0; overflow: hidden; }
+    body.sidebar-collapsed .nav-item-app { justify-content: center; padding: 12px 0; }
+    body.sidebar-collapsed .nav-item-app span { display: none; }
+    
+    .app-page { padding-top: 64px; padding-left: 240px; min-height: 100dvh; background: var(--cream); display: none; position: relative; z-index: 2; transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    body.sidebar-collapsed .app-page { padding-left: 76px; }
+    .app-page.active { display: block; }
+
+    /* GRID & CARDS */
+    .yt-feed { padding: 40px 32px; max-width: 1600px; margin: 0 auto; }
+    .yt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px 24px; }
+    .yt-card { cursor: pointer; transition: transform 0.2s; }
+    .yt-card:hover { transform: translateY(-4px); }
+    .yt-thumb { width: 100%; aspect-ratio: 16/9; background: #222; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .yt-thumb img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: filter 0.3s; }
+    .yt-card:hover .yt-thumb img { filter: grayscale(0%); }
+    .yt-progress-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.3); }
+    .yt-progress-fill { height: 100%; background: var(--accent); }
+    .yt-meta { display: flex; gap: 14px; align-items: flex-start; }
+    .yt-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: var(--cream); display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; flex-shrink: 0; }
+    .yt-info h3 { font-size: 16px; font-weight: 800; line-height: 1.3; margin-bottom: 6px; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .yt-info p { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5; }
+
+    /* PDF SECTION */
+    .pdf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; padding-top: 24px; }
+    .pdf-card { border: 1px solid var(--line); border-radius: 12px; padding: 20px; background: rgba(255,255,255,0.4); display: flex; flex-direction: column; gap: 16px; transition: transform 0.2s, box-shadow 0.2s; }
+    .pdf-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+    .pdf-icon-wrap { width: 48px; height: 48px; background: var(--ink); color: var(--cream); border-radius: 10px; display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+    /* WATCH PAGE */
+    .yt-watch { display: grid; grid-template-columns: 1fr 400px; height: calc(100dvh - 64px); overflow: hidden; }
+    .yt-watch-main { padding: 24px 32px; overflow-y: auto; }
+    .yt-watch-sidebar { border-left: 1px solid var(--line); overflow-y: auto; background: var(--cream); }
+    .yt-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
+    .yt-player iframe { width: 100%; height: 100%; border: none; position: absolute; inset: 0; }
+    .yt-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .yt-action-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .yt-playlist-header { padding: 20px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--cream); z-index: 5; }
+
+    /* FORM & PROFILE SECTION */
+    .profile-container{max-width:680px;margin:0 auto;padding:48px 24px 64px;}
+    .form-section{border: 1px solid var(--line); padding: 24px; margin-bottom: 22px; background: rgba(255,255,255,0.4); border-radius: 12px;}
+    .form-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px; margin-bottom: 16px;}
+    .form-group label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted); margin-bottom:4px; display:block;}
+    .form-group input, .form-group select, .form-group textarea{width:100%; background:transparent;border:none;border-bottom:1px solid var(--line);padding:9px 0;color:var(--ink);font-family:var(--font-display);font-size:14px;outline:none; border-radius:0; resize:vertical;}
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus{border-color:var(--ink)}
+
+    /* ── RESPONSIVE TOKENS ──────────────────────────────────────── */
+    :root { --pad-x: 32px; --pad-y: 40px; }
+    @media(max-width:768px){ :root{ --pad-x: 20px; --pad-y: 28px; } }
+    @media(max-width:480px){ :root{ --pad-x: 16px; --pad-y: 20px; } }
+
+    /* ── HIDE / SHOW HELPERS ─────────────────────────────────────── */
+    .hide-mobile { display: flex; }
+    @media(max-width:768px){ .hide-mobile{ display: none !important; } }
+
+    /* ── MOBILE DRAWER OVERLAY ───────────────────────────────────── */
+    #sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(10,10,10,0.45);
+      z-index: 480;
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    #sidebar-overlay.open { opacity: 1; }
+
+    /* ── TABLET ≤768px ───────────────────────────────────────────── */
+    @media(max-width:768px){
+      /* Sidebar becomes off-canvas drawer */
+      #app-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0s;
+        width: 260px !important;
+        padding: 24px 16px !important;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+      }
+      #app-sidebar.drawer-open { transform: translateX(0); }
+      body.sidebar-collapsed #app-sidebar { transform: translateX(-100%); }
+
+      /* Content fills full width */
+      .app-page { padding-left: 0 !important; }
+
+      /* Feed & Grids */
+      .yt-feed { padding: var(--pad-y) var(--pad-x); }
+      .yt-grid { grid-template-columns: repeat(auto-fill, minmax(min(280px,100%), 1fr)); gap: 28px 16px; }
+      .pdf-grid { grid-template-columns: 1fr; }
+
+      /* Profile */
+      .form-row { grid-template-columns: 1fr; }
+      .profile-container { padding: 32px var(--pad-x) 48px; }
+
+      /* Visor */
+      .yt-watch { grid-template-columns: 1fr; height: auto; overflow: visible; }
+      .yt-watch-main { padding: var(--pad-y) var(--pad-x); }
+      .yt-watch-sidebar { border-left: none; border-top: 1px solid var(--line); }
+      .yt-title { font-size: 18px; }
+
+      /* Playlist toggle button */
+      #playlist-toggle {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        background: none;
+        border: none;
+        padding: 16px 20px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        cursor: pointer;
+        color: var(--ink);
+        border-bottom: 1px solid var(--line);
+      }
+      #playlist-toggle svg { transition: transform 0.25s; }
+      #playlist-toggle.collapsed svg { transform: rotate(-90deg); }
+      #playlist-container-wrap {
+        overflow: hidden;
+        max-height: 2000px;
+        transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+      }
+      #playlist-container-wrap.collapsed { max-height: 0; }
+    }
+
+    /* ── MOBILE ≤480px ───────────────────────────────────────────── */
+    @media(max-width:480px){
+      .yt-feed { padding: var(--pad-y) var(--pad-x); }
+      .yt-grid { grid-template-columns: 1fr; gap: 24px; }
+      .yt-info h3 { font-size: 14px; }
+      .yt-action-bar { flex-direction: column; align-items: stretch; }
+      .yt-action-bar button { width: 100%; justify-content: center; }
+      #app-topbar { padding: 0 16px; }
+    }
+
+    /* ══════════════════════════════════════════════════
+       HERO BANNER
+    ══════════════════════════════════════════════════ */
+    .hero-banner {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 40px;
+      min-height: 260px;
+      background: var(--ink);
+      display: flex;
+      align-items: center;
+    }
+    .hero-banner-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(40%) brightness(0.45);
+    }
+    .hero-banner-content {
+      position: relative;
+      z-index: 2;
+      padding: 40px 48px;
+      max-width: 600px;
+    }
+    .hero-estreno-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    .hero-estreno-badge::before { content: '●'; font-size: 7px; animation: blink .8s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .hero-banner h2 {
+      font-size: 36px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .hero-banner p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 9999px;
+      padding: 12px 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .hero-cta:hover { opacity: .85; }
+
+    /* ══════════════════════════════════════════════════
+       PROMO BANNER (anuncio publicitario editable)
+    ══════════════════════════════════════════════════ */
+    #promo-banner-wrap { margin-bottom: 28px; }
+    .promo-banner {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      min-height: 90px;
+      padding: 24px 32px;
+      gap: 24px;
+    }
+    .promo-banner-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.25;
+    }
+    .promo-banner-body {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .promo-banner-texts { flex: 1; min-width: 180px; }
+    .promo-banner-titulo {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+    .promo-banner-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .promo-banner-cta {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 9999px;
+      padding: 10px 22px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .promo-banner-cta:hover { background: rgba(0,0,0,0.4); }
+    .promo-banner-close {
+      position: relative;
+      z-index: 3;
+      flex-shrink: 0;
+      background: rgba(0,0,0,0.2);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      transition: background .2s;
+    }
+    .promo-banner-close:hover { background: rgba(0,0,0,0.4); }
+    @media(max-width:600px) {
+      .promo-banner { padding: 18px 20px; min-height: 70px; }
+      .promo-banner-titulo { font-size: 15px; }
+    }
+
+    @media(max-width:768px) {
+      .hero-banner { min-height: 200px; }
+      .hero-banner-content { padding: 28px 24px; }
+      .hero-banner h2 { font-size: 24px; }
+    }
+
+    /* ══════════════════════════════════════════════════
+       CATEGORY TILES
+    ══════════════════════════════════════════════════ */
+    .cat-tiles {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      margin-bottom: 40px;
+      padding-bottom: 8px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .cat-tiles::-webkit-scrollbar { display: none; }
+    .cat-tile {
+      flex-shrink: 0;
+      position: relative;
+      width: 200px;
+      height: 120px;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .cat-tile:hover { transform: translateY(-4px); }
+    .cat-tile img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) brightness(0.5);
+      transition: filter .3s;
+    }
+    .cat-tile:hover img { filter: grayscale(0%) brightness(0.45); }
+    .cat-tile-content {
+      position: absolute;
+      inset: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .cat-tile-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 700;
+    }
+    .cat-tile-name {
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+    .cat-tile.active-tile img { filter: grayscale(0%) brightness(0.45); }
+    .cat-tile.active-tile .cat-tile-name { color: #fff; }
+    @media(max-width:480px) { .cat-tile { width: 160px; height: 100px; } }
+
+    /* ══════════════════════════════════════════════════
+       COURSE CARD v2 — con badge, metadatos, instructor
+    ══════════════════════════════════════════════════ */
+    .course-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .course-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .course-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #222;
+      overflow: hidden;
+    }
+    .course-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%);
+      transition: filter .3s;
+    }
+    .course-card:hover .course-thumb img { filter: grayscale(0%); }
+    .course-cat-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--ink);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .course-cat-badge.estreno-badge { background: var(--accent); }
+    .course-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(255,255,255,0.3);
+    }
+    .course-progress-fill { height: 100%; background: var(--accent); transition: width .3s; }
+    .course-body {
+      padding: 16px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .course-instructor-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .course-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--cream);
+      display: grid;
+      place-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .course-instructor-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .course-level-badge {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.05);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .course-title {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .course-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .course-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .course-enroll-btn {
+      width: 100%;
+      margin-top: auto;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      border-radius: 9999px;
+      padding: 11px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .course-enroll-btn:hover { opacity: .8; }
+    .course-enroll-btn:disabled { opacity: .5; cursor: not-allowed; }
+    /* Enrolled state */
+    .course-card.enrolled .course-enroll-btn {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    /* Estreno card — dark */
+    .course-card.estreno { background: var(--ink); }
+    .course-card.estreno .course-title { color: var(--cream); }
+    .course-card.estreno .course-instructor-name { color: var(--cream); }
+    .course-card.estreno .course-meta-item { color: rgba(255,255,255,0.4); }
+    .course-card.estreno .course-level-badge { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+    .course-card.estreno .course-enroll-btn { background: var(--accent); }
+    .course-card.hidden-filter { display: none !important; }
+
+    /* ══════════════════════════════════════════════════
+       VISOR: USER STATS CARD
+    ══════════════════════════════════════════════════ */
+    .user-stats-card {
+      margin: 20px 20px 0;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--ink);
+      margin-bottom: 24px;
+    }
+    .user-stats-banner {
+      height: 72px;
+      background: linear-gradient(135deg, #0A0A0A 0%, #2a2a2a 100%);
+      position: relative;
+    }
+    .user-stats-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      position: absolute;
+      bottom: -24px;
+      left: 20px;
+      border: 3px solid var(--cream);
+    }
+    .user-stats-body {
+      padding: 32px 20px 20px;
+    }
+    .user-stats-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+    .user-stats-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .user-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.04);
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .stat-box-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-box-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    /* ══════════════════════════════════════════════════
+       PLAYLIST: SECTION HEADERS
+    ══════════════════════════════════════════════════ */
+    .playlist-section-hdr {
+      padding: 12px 20px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(0,0,0,0.02);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+    }
+
+    /* ══════════════════════════════════════════════════
+       MIS ENTRENAMIENTOS: progress card
+    ══════════════════════════════════════════════════ */
+    .my-course-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .my-course-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .my-course-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #222;
+      overflow: hidden;
+    }
+    .my-course-thumb img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(60%); transition: filter .3s; }
+    .my-course-card:hover .my-course-thumb img { filter: grayscale(0%); }
+    .my-course-progress-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: rgba(255,255,255,0.3); }
+    .my-course-progress-fill { height: 100%; background: var(--accent); transition: width .4s; }
+    .completed-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #22c55e;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .my-course-body { padding: 16px 18px 18px; }
+    .my-course-title { font-size: 15px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .my-course-progress-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 8px;
+    }
+    .my-course-bar-wrap { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+    .my-course-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s; }
+    .my-course-continue-btn {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      border-radius: 9999px;
+      padding: 10px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+      text-align: center;
+    }
+    .my-course-continue-btn:hover { opacity: .8; }
+  </style>
+</head>
+<body>
+
+<!-- Overlay para drawer mobile -->
+<div id="sidebar-overlay"></div>
+
+<div id="global-loader">
+  <div class="loader-spinner"></div>
+  <div class="ml" id="loader-status">Verificando Credenciales...</div>
+</div>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ═══════════════ TOPBAR ═══════════════════════ -->
+<header id="app-topbar">
+  <div style="display:flex; align-items:center; gap: 16px;">
+    <svg id="btn-toggle-sidebar" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor:pointer; color:var(--ink);"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    <div style="width:24px;height:24px;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:9px; margin-left: 8px;">◉</div>
+    <span style="font-weight: 900; font-size: 16px; letter-spacing: -0.02em;">REFORMA</span>
+  </div>
+  
+  <div style="flex: 1; max-width: 600px; margin: 0 24px;" class="hide-mobile">
+    <div style="display: flex; align-items: center; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); border-radius: 999px; padding: 0 16px; height: 40px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="global-search" placeholder="Buscar lecciones o recursos..." style="border:none; background:transparent; outline:none; width:100%; padding-left:12px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ink);">
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; gap: 16px;">
+    <button class="pill-outline" style="padding: 8px 16px; font-size: 9px;" onclick="handleLogout()">SALIR</button>
+    <div id="user-initials" class="yt-avatar" style="cursor:pointer; width: 32px; height: 32px; background: var(--ink); color: var(--cream); border-radius: 50%; display: grid; place-items: center; font-family: 'JetBrains Mono', monospace; font-size: 12px;" onclick="window.location.hash='#/ajustes'">...</div>
+  </div>
+</header>
+
+<!-- ═══════════════ SIDEBAR ═══════════════════════ -->
+<aside id="app-sidebar">
+  <div class="sidebar-section">
+    <div class="nav-item-app active" title="Explorar" onclick="window.location.hash='#/cursos'" id="nav-btn-cursos">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Explorar</span>
+    </div>
+    <div class="nav-item-app" title="Mis Entrenamientos" onclick="window.location.hash='#/entrenamientos'" id="nav-btn-entrenamientos">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+      <span>Mis Entrenamientos</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-title">Biblioteca</div>
+    <div class="nav-item-app" title="Mis Guías PDF" onclick="window.location.hash='#/recursos'" id="nav-btn-recursos">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      <span>Mis Guías PDF</span>
+    </div>
+    <div class="nav-item-app" title="Clases Grabadas" onclick="window.location.hash='#/clases-grabadas'" id="nav-btn-clases">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+      <span>Clases Grabadas</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="sidebar-admin-section" style="display:none;">
+    <div class="sidebar-title">Administración</div>
+    <a class="nav-item-app" href="admin.html" title="Panel Admin">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Panel Admin</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-title">Cuenta</div>
+    <div class="nav-item-app" title="Mi Perfil" onclick="window.location.hash='#/ajustes'" id="nav-btn-ajustes">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
+      <span>Mi Perfil</span>
+    </div>
+    <div class="nav-item-app" title="Soporte" onclick="window.location.hash='#/soporte'" id="nav-btn-soporte">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <span>Soporte</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ CONTENIDO PRINCIPAL ═══════════════════════ -->
+<main id="app-main">
+
+  <!-- EXPLORAR (CATÁLOGO) -->
+  <section class="page app-page" id="page-cursos">
+    <div class="yt-feed">
+
+      <!-- PROMO BANNER (anuncio editable desde admin) -->
+      <div id="promo-banner-wrap"></div>
+
+      <!-- HERO BANNER (estreno destacado) -->
+      <div id="hero-banner-wrap"></div>
+
+      <!-- HEADER -->
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px;">
+        <div>
+          <div class="sid ml" style="margin-bottom:8px;">CATÁLOGO</div>
+          <h1 style="font-size: 32px; font-weight: 900; letter-spacing: -0.03em;">Explorar.</h1>
+        </div>
+      </div>
+
+      <!-- CATEGORY TILES -->
+      <div class="cat-tiles" id="cat-tiles"></div>
+
+      <!-- FILTER PILLS -->
+      <div class="category-filters" id="explore-filters">
+        <button class="cat-pill active" data-filter="todos">Todos</button>
+        <button class="cat-pill" data-filter="nuevos">Nuevos</button>
+        <button class="cat-pill" data-filter="identidad">Identidad</button>
+        <button class="cat-pill" data-filter="liderazgo">Gobierno</button>
+      </div>
+
+      <div id="nuevos-banner"><span class="dot"></span>ESTRENOS — CONTENIDO RECIÉN PUBLICADO</div>
+
+      <div class="yt-grid" id="catalog-grid">
+        <p class="ml" style="grid-column: 1/-1; text-align:center; padding: 40px;">Cargando catálogo...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MIS ENTRENAMIENTOS -->
+  <section class="page app-page" id="page-entrenamientos">
+    <div class="yt-feed">
+      <div style="margin-bottom: 36px;">
+        <div class="sid ml" style="margin-bottom:10px;">PRINCIPAL</div>
+        <h1 style="font-size: 32px; font-weight: 900; letter-spacing: -0.03em;">Mis Entrenamientos.</h1>
+      </div>
+      <div class="yt-grid" id="my-courses-grid">
+        <p class="ml" style="grid-column: 1/-1; text-align:center; padding: 40px;">Buscando tus programas activos...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISOR DE CLASES -->
+  <section class="page app-page" id="page-visor">
+    <div class="yt-watch">
+      <div class="yt-watch-main">
+        <div class="yt-player-wrap">
+          <div class="yt-player">
+            <iframe id="main-video" src="" frameborder="0" allowfullscreen></iframe>
+          </div>
+          <h1 class="yt-title" id="current-video-title">Seleccionando lección...</h1>
+          <div class="yt-action-bar">
+            <button class="pill-outline" id="btn-pdf-download">↓ MATERIAL PDF</button>
+            <button class="pill-dark" id="btn-completar">✓ MARCAR COMO COMPLETADO</button>
+          </div>
+          <div class="yt-desc-box" id="current-video-desc">...</div>
+        </div>
+      </div>
+      <div class="yt-watch-sidebar">
+        <!-- USER STATS CARD -->
+        <div class="user-stats-card" id="visor-user-card">
+          <div class="user-stats-banner">
+            <div class="user-stats-avatar" id="visor-avatar">?</div>
+          </div>
+          <div class="user-stats-body">
+            <div class="user-stats-name" id="visor-user-name">—</div>
+            <div class="user-stats-email" id="visor-user-email">—</div>
+            <div class="user-stats-grid">
+              <div class="stat-box">
+                <div class="stat-box-value" id="stat-completadas">0</div>
+                <div class="stat-box-label">Clases</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-value" id="stat-cursos">0</div>
+                <div class="stat-box-label">Cursos</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-value" id="stat-pct">0%</div>
+                <div class="stat-box-label">Avance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAYLIST HEADER -->
+        <div class="yt-playlist-header">
+          <h3 id="playlist-name" style="font-size:15px;font-weight:800;margin-bottom:6px;">Contenido</h3>
+          <p class="ml" id="progress-text" style="font-size:9px;">Cargando progreso...</p>
+          <div style="height: 4px; background: var(--line); margin-top: 10px; border-radius:2px; overflow:hidden;">
+            <div id="progress-bar" style="width: 0%; background: var(--accent); height: 100%; transition: width 0.4s; border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <button id="playlist-toggle" onclick="togglePlaylist()" style="display:none;">
+          <span>VER LECCIONES DEL CURSO</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="playlist-container-wrap">
+          <div class="yt-playlist-list" id="playlist-container"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECURSOS PDF -->
+  <section class="page app-page" id="page-recursos">
+    <div class="yt-feed">
+      <h1 style="font-size: 32px; font-weight: 900; margin-bottom: 32px;">Tus Guías PDF.</h1>
+      <div class="pdf-grid" id="pdf-container"></div>
+    </div>
+  </section>
+
+  <!-- CLASES GRABADAS -->
+  <section class="page app-page" id="page-clases-grabadas">
+    <div class="yt-feed">
+      <div style="margin-bottom: 24px;">
+        <div class="sid ml" style="margin-bottom:10px;">BIBLIOTECA</div>
+        <h1 style="font-size: 32px; font-weight: 900; letter-spacing: -0.03em;">Clases Grabadas.</h1>
+      </div>
+      <div class="yt-grid" id="clases-grid">
+        <p class="ml" style="grid-column:1/-1;text-align:center;padding:40px;">Cargando clases...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOPORTE -->
+  <section class="page app-page" id="page-soporte">
+    <div class="profile-container" style="text-align:center;">
+      <div class="sid ml" style="justify-content:center; margin-bottom:10px;">ASISTENCIA DIRECTA</div>
+      <h1 style="font-size:32px; font-weight:900; margin-bottom:24px;">Centro de Soporte</h1>
+      <div class="form-section" style="text-align:left;">
+        <h3 class="form-section-title">Aviso Importante</h3>
+        <p style="font-size: 14px; line-height: 1.6; color: var(--ink); margin-bottom: 16px;">Nuestro equipo técnico y académico está listo para ayudarte.</p>
+        <div style="padding: 24px; background: rgba(0,0,0,0.03); border-radius: 8px; text-align: center; border: 1px dashed var(--line);">
+          <a href="https://wa.me/584120000000" target="_blank" class="pill-dark" style="background:#25D366; color:#fff;">CONTACTAR POR WHATSAPP</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AJUSTES DE PERFIL -->
+  <section class="page app-page" id="page-ajustes">
+    <div class="profile-container">
+      <div class="sid ml" style="margin-bottom:10px;">CONFIGURACIÓN</div>
+      <h1 style="font-size:32px; font-weight:900; margin-bottom:32px;">MI PERFIL</h1>
+      <form id="profile-form">
+        <div class="form-section">
+          <h3 class="form-section-title">Datos Básicos</h3>
+          <div class="form-row">
+            <div class="form-group"><label>Nombre</label><input type="text" name="nombre" required /></div>
+            <div class="form-group"><label>Apellido</label><input type="text" name="apellido" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Email (Solo lectura)</label><input type="email" id="display-email" disabled style="opacity:.5;"/></div>
+            <div class="form-group"><label>WhatsApp</label><input type="tel" name="telefono" /></div>
+          </div>
+          <button type="submit" class="pill-dark" style="width:100%; margin-top:20px;">GUARDAR CAMBIOS</button>
+        </div>
+      </form>
+
+      <!-- Cambiar contraseña -->
+      <div class="form-section" style="margin-top:32px;border-top:1px solid var(--line);padding-top:28px;">
+        <h3 class="form-section-title">Cambiar Contraseña</h3>
+        <form id="form-cambiar-pass" style="display:flex;flex-direction:column;gap:16px;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nueva contraseña</label>
+              <input type="password" id="cp-nueva" placeholder="Mínimo 6 caracteres" autocomplete="new-password"/>
+              <span id="err-cp-nueva" style="color:#E63946;font-size:11px;margin-top:4px;display:block;"></span>
+            </div>
+            <div class="form-group">
+              <label>Confirmar contraseña</label>
+              <input type="password" id="cp-confirmar" autocomplete="new-password"/>
+              <span id="err-cp-confirmar" style="color:#E63946;font-size:11px;margin-top:4px;display:block;"></span>
+            </div>
+          </div>
+          <button type="submit" class="pill-dark" style="width:100%;" id="btn-cambiar-pass">CAMBIAR CONTRASEÑA</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // 1. CONFIGURACIÓN SUPABASE
+  const SUPABASE_URL = "https://vcshkwnjigughrkomaxa.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc2hrd25qaWd1Z2hya29tYXhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTM2ODQsImV4cCI6MjA5NDQyOTY4NH0.zHJREGFx7rejpwuuXH6YwZhaHRER-OCci4bfiNm5ePU";
+  
+  let _supabase = null;
+  let currentUser = null;
+
+  if(SUPABASE_URL && SUPABASE_KEY) {
+    try { _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { console.error(e); }
+  }
+
+  // 2. INICIALIZADOR
+  async function initApp() {
+    const loaderStatus = document.getElementById('loader-status');
+    if (!_supabase) {
+      setTimeout(() => { document.getElementById('global-loader').classList.add('hidden'); checkRouteAccess(); }, 1000);
+      return;
+    }
+
+    try {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (!session) { window.location.href = "index.html#/login"; return; }
+      currentUser = session.user;
+
+      // Guardián de perfil: verificar antes de cargar el resto de la academia
+      const profileExists = await loadUserProfile();
+      if (!profileExists) {
+        if (loaderStatus) loaderStatus.innerText = "Perfil incompleto. Redirigiendo...";
+        setTimeout(() => { window.location.href = "index.html#/completar-perfil"; }, 1500);
+        return;
+      }
+
+      // Perfil confirmado — cargar academia en paralelo
+      await Promise.all([
+        loadPromoBanner(),
+        loadCatalog(),
+        loadMyCourses(),
+        loadResources(),
+        loadClasesGrabadas()
+      ]);
+
+      document.getElementById('global-loader').classList.add('hidden');
+      checkRouteAccess();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('global-loader').classList.add('hidden');
+      checkRouteAccess();
+    }
+  }
+
+  // 3. CARGAR CATÁLOGO (EXPLORAR)
+  async function loadCatalog() {
+    const grid = document.getElementById('catalog-grid');
+
+    const [{ data: cursos, error }, { data: inscripciones }] = await Promise.all([
+      _supabase.from('Cursos').select('*'),
+      _supabase.from('Inscripciones').select('curso_id').eq('usuario_id', currentUser?.id || '')
+    ]);
+
+    if (error || !cursos) return;
+
+    const enrolledIds = new Set((inscripciones || []).map(i => i.curso_id));
+
+    // Hero banner — primer estreno
+    const estreno = cursos.find(c => c.es_estreno);
+    renderHeroBanner(estreno);
+
+    // Category tiles
+    renderCatTiles(cursos);
+
+    grid.innerHTML = cursos.map(c => {
+      const isEnrolled = enrolledIds.has(c.id);
+      const catLabel   = c.categoria ? c.categoria.split(' ')[0].toUpperCase() : '';
+      const nivel      = c.nivel || 'Todos los niveles';
+      const duracion   = c.duracion_total || '';
+      const instructor = c.instructor_nombre || c.instructor || 'REFORMA';
+      const initial    = instructor.charAt(0).toUpperCase();
+      const thumb      = c.miniatura_url || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80';
+      const catData    = `${c.categoria || ''} todos${c.es_estreno ? ' nuevos' : ''}`;
+
+      return `
+<div class="course-card${c.es_estreno ? ' estreno' : ''}" data-category="${catData}" data-id="${c.id}">
+  <div class="course-thumb" onclick="window.location.hash='#/visor?id=${c.id}'">
+    <img src="${thumb}" alt="${c.titulo}" loading="lazy">
+    ${c.es_estreno
+      ? '<span class="course-cat-badge estreno-badge">● ESTRENO</span>'
+      : catLabel ? `<span class="course-cat-badge">${catLabel}</span>` : ''}
+  </div>
+  <div class="course-body">
+    <div class="course-instructor-row">
+      <div class="course-avatar">${initial}</div>
+      <span class="course-instructor-name">${instructor}</span>
+      <span class="course-level-badge">${nivel}</span>
+    </div>
+    <div class="course-title">${c.titulo}</div>
+    <div class="course-meta-row">
+      ${duracion ? `<span class="course-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${duracion}</span>` : ''}
+      ${c.descripcion ? `<span class="course-meta-item" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">${c.descripcion.substring(0,60)}${c.descripcion.length>60?'…':''}</span>` : ''}
+    </div>
+    <button class="course-enroll-btn" onclick="event.stopPropagation(); inscribirCurso('${c.id}', this)">
+      ${isEnrolled ? '✓ EN MIS ENTRENAMIENTOS' : '+ AÑADIR A MIS ENTRENAMIENTOS'}
+    </button>
+  </div>
+</div>`;
+    }).join('');
+
+    attachFilters();
+  }
+
+  // ── PROMO BANNER ───────────────────────────────────────────────────
+  async function loadPromoBanner() {
+    const wrap = document.getElementById('promo-banner-wrap');
+    if (!wrap) return;
+
+    // Si el usuario ya lo cerró en esta sesión, no mostrarlo
+    const bannerId = sessionStorage.getItem('promoBannerDismissed');
+
+    const { data: banners } = await _supabase
+      .from('Banners')
+      .select('*')
+      .eq('activo', true)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const b = banners?.[0];
+    if (!b) return;
+
+    // Si fue dismissed y es el mismo banner, no mostrar
+    if (bannerId === b.id) return;
+
+    const colorFondo = b.color_fondo || '#E63946';
+    const colorTexto = b.color_texto || '#FFFFFF';
+
+    const imgHtml = b.imagen_url
+      ? `<img class="promo-banner-bg" src="${b.imagen_url}" alt="">`
+      : '';
+
+    const ctaHtml = b.link_url
+      ? `<a class="promo-banner-cta" href="${b.link_url}" target="_blank" rel="noopener" style="color:${colorTexto};">${b.link_texto || 'Ver más'} →</a>`
+      : '';
+
+    wrap.innerHTML = `
+<div class="promo-banner" style="background:${colorFondo};color:${colorTexto};">
+  ${imgHtml}
+  <div class="promo-banner-body">
+    <div class="promo-banner-texts">
+      <div class="promo-banner-titulo">${b.titulo}</div>
+      ${b.subtitulo ? `<div class="promo-banner-sub">${b.subtitulo}</div>` : ''}
+    </div>
+    ${ctaHtml}
+  </div>
+  <button class="promo-banner-close" onclick="dismissPromoBanner('${b.id}')" style="color:${colorTexto};" title="Cerrar">✕</button>
+</div>`;
+  }
+
+  function dismissPromoBanner(id) {
+    sessionStorage.setItem('promoBannerDismissed', id);
+    const wrap = document.getElementById('promo-banner-wrap');
+    if (wrap) wrap.innerHTML = '';
+  }
+
+  function renderHeroBanner(curso) {
+    const wrap = document.getElementById('hero-banner-wrap');
+    if (!wrap || !curso) return;
+    const thumb = curso.miniatura_url || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80';
+    wrap.innerHTML = `
+<div class="hero-banner">
+  <img class="hero-banner-img" src="${thumb}" alt="${curso.titulo}">
+  <div class="hero-banner-content">
+    <div class="hero-estreno-badge">Estreno</div>
+    <h2>${curso.titulo}</h2>
+    <p>${curso.instructor_nombre || curso.instructor || 'REFORMA'} · ${curso.nivel || 'Todos los niveles'}</p>
+    <button class="hero-cta" onclick="window.location.hash='#/visor?id=${curso.id}'">
+      ▶ VER AHORA
+    </button>
+  </div>
+</div>`;
+  }
+
+  function renderCatTiles(cursos) {
+    const container = document.getElementById('cat-tiles');
+    if (!container) return;
+    // Extraer categorías únicas
+    const catMap = {};
+    cursos.forEach(c => {
+      if (!c.categoria) return;
+      c.categoria.split(' ').forEach(cat => {
+        if (cat && cat !== 'todos' && !catMap[cat]) {
+          catMap[cat] = c.miniatura_url || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80';
+        }
+      });
+    });
+    const cats = Object.entries(catMap);
+    if (cats.length === 0) return;
+    container.innerHTML = cats.map(([cat, img], i) => `
+<div class="cat-tile" data-cat="${cat}" onclick="filterByCat('${cat}')">
+  <img src="${img}" alt="${cat}" loading="lazy">
+  <div class="cat-tile-content">
+    <span class="cat-tile-num">0${i+1}</span>
+    <span class="cat-tile-name">${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+  </div>
+</div>`).join('');
+  }
+
+  function filterByCat(cat) {
+    // Sync filter pills
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    const pill = document.querySelector(`.cat-pill[data-filter="${cat}"]`);
+    if (pill) pill.classList.add('active');
+    // Sync tiles
+    document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('active-tile'));
+    const tile = document.querySelector(`.cat-tile[data-cat="${cat}"]`);
+    if (tile) tile.classList.add('active-tile');
+    // Filter cards
+    const banner = document.getElementById('nuevos-banner');
+    if (banner) banner.classList.toggle('visible', cat === 'nuevos');
+    document.querySelectorAll('#catalog-grid .course-card').forEach(card => {
+      const cats = (card.dataset.category || '').split(' ');
+      card.classList.toggle('hidden-filter', !cats.includes(cat));
+    });
+  }
+
+  // 4. CARGAR MIS ENTRENAMIENTOS
+  async function loadMyCourses() {
+    const grid = document.getElementById('my-courses-grid');
+    if (!grid) return;
+    const { data: inscripciones, error } = await _supabase
+      .from('Inscripciones')
+      .select('*, Cursos(*)')
+      .eq('usuario_id', currentUser.id);
+
+    if (error || !inscripciones || inscripciones.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding: 60px 20px;">
+          <div style="font-size:40px; margin-bottom:16px;">📚</div>
+          <p class="ml" style="margin-bottom:20px;">No tienes cursos activos aún.</p>
+          <button class="pill-dark" onclick="window.location.hash='#/cursos'">EXPLORAR CATÁLOGO</button>
+        </div>`;
+      return;
+    }
+
+    // Obtener progreso de todas las lecciones del usuario
+    const { data: progreso } = await _supabase
+      .from('Progreso')
+      .select('leccion_id, completado')
+      .eq('usuario_id', currentUser.id)
+      .eq('completado', true);
+
+    const leccionesCompletadas = new Set((progreso || []).map(p => p.leccion_id));
+
+    // Para cada inscripción, obtener total de lecciones
+    const cursosConProgreso = await Promise.all(inscripciones.map(async ins => {
+      const cursoId = ins.Cursos?.id;
+      if (!cursoId) return { ins, done: 0, total: 0 };
+      const { data: lecs } = await _supabase.from('Lecciones').select('id').eq('curso_id', cursoId);
+      const total = lecs?.length || 0;
+      const done  = (lecs || []).filter(l => leccionesCompletadas.has(l.id)).length;
+      return { ins, done, total };
+    }));
+
+    grid.innerHTML = cursosConProgreso.map(({ ins, done, total }) => {
+      const curso = ins.Cursos;
+      if (!curso) return '';
+      const pct       = total > 0 ? Math.round((done / total) * 100) : 0;
+      const completed = pct === 100 && total > 0;
+      const thumb     = curso.miniatura_url || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80';
+      const btnText   = completed ? '✓ COMPLETADO' : pct > 0 ? '▶ CONTINUAR' : '▶ COMENZAR';
+      return `
+<div class="my-course-card" onclick="window.location.hash='#/visor?id=${curso.id}'">
+  <div class="my-course-thumb">
+    <img src="${thumb}" alt="${curso.titulo}" loading="lazy">
+    <div class="my-course-progress-bar">
+      <div class="my-course-progress-fill" style="width:${pct}%"></div>
+    </div>
+    ${completed ? '<span class="completed-badge">✓ COMPLETADO</span>' : ''}
+  </div>
+  <div class="my-course-body">
+    <div class="my-course-title">${curso.titulo}</div>
+    ${total > 0 ? `
+    <div class="my-course-progress-text">${done} de ${total} lecciones — ${pct}%</div>
+    <div class="my-course-bar-wrap"><div class="my-course-bar-fill" style="width:${pct}%"></div></div>` : ''}
+    <button class="my-course-continue-btn" style="${completed ? 'background:#22c55e;' : ''}">${btnText}</button>
+  </div>
+</div>`;
+    }).join('');
+  }
+
+  // 5. CARGAR RECURSOS PDF
+  async function loadResources() {
+    const container = document.getElementById('pdf-container');
+    if (!container) return;
+
+    // Cargar en paralelo: PDFs por lección + materiales por curso
+    const [{ data: lecciones }, { data: cursos }] = await Promise.all([
+      _supabase.from('Lecciones').select('id, titulo, pdf_url, curso_id').not('pdf_url', 'is', null),
+      _supabase.from('Cursos').select('id, titulo, materiales').not('materiales', 'is', null)
+    ]);
+
+    const items = [];
+
+    // Materiales de lección (PDF por lección)
+    (lecciones || []).forEach(l => {
+      items.push({ titulo: l.titulo, url: l.pdf_url, subtitulo: 'Material de lección', tipo: 'PDF' });
+    });
+
+    // Materiales de curso (array JSONB)
+    (cursos || []).forEach(c => {
+      const mats = Array.isArray(c.materiales) ? c.materiales : [];
+      mats.forEach(m => {
+        if (m.url) items.push({ titulo: m.titulo || 'Material', url: m.url, subtitulo: c.titulo, tipo: 'DOC' });
+      });
+    });
+
+    if (items.length === 0) {
+      container.innerHTML = '<p class="ml" style="text-align:center;padding:40px 0;">No hay recursos disponibles aún.</p>';
+      return;
+    }
+
+    container.innerHTML = items.map(item => `
+      <div class="pdf-card">
+        <div style="display:flex; gap:16px; align-items:center;">
+          <div class="pdf-icon-wrap" style="background:var(--accent);">${item.tipo}</div>
+          <div>
+            <h3 style="font-size:14px; font-weight:800;">${item.titulo}</h3>
+            <p style="font-size:11px; color:var(--muted);">${item.subtitulo}</p>
+          </div>
+        </div>
+        <a href="${item.url}" target="_blank" rel="noopener" class="pill-outline" style="width:100%; text-align:center;">↓ DESCARGAR</a>
+      </div>
+    `).join('');
+  }
+
+  // 6. CLASES GRABADAS
+  async function loadClasesGrabadas() {
+    const grid = document.getElementById('clases-grid');
+    if (!grid) return;
+
+    const [{ data: lecciones }, { data: cursos }] = await Promise.all([
+      _supabase.from('Lecciones').select('id, titulo, video_url, curso_id, orden, duracion_min, duracion').not('video_url', 'is', null).order('orden', { ascending: true }),
+      _supabase.from('Cursos').select('id, titulo, miniatura_url')
+    ]);
+
+    if (!lecciones || lecciones.length === 0) {
+      grid.innerHTML = '<p class="ml" style="grid-column:1/-1;text-align:center;">No hay clases grabadas disponibles aún.</p>';
+      return;
+    }
+
+    const cursoMap = new Map((cursos || []).map(c => [c.id, c]));
+
+    grid.innerHTML = lecciones.map(l => {
+      const curso = cursoMap.get(l.curso_id);
+      const thumb = curso?.miniatura_url || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80';
+      const dur   = l.duracion_min ? `${l.duracion_min} min` : (l.duracion || '');
+      return `
+<div class="course-card" onclick="abrirLeccion('${l.id}','${l.curso_id}')">
+  <div class="course-thumb">
+    <img src="${thumb}" alt="${l.titulo}" loading="lazy">
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+      <div style="width:44px;height:44px;background:rgba(255,255,255,0.9);border-radius:50%;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--ink)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </div>
+    </div>
+    <span class="course-cat-badge">CLASE</span>
+  </div>
+  <div class="course-body">
+    <div class="course-instructor-row">
+      <div class="course-avatar">R</div>
+      <span class="course-instructor-name">REFORMA</span>
+      ${dur ? `<span class="course-level-badge">${dur}</span>` : ''}
+    </div>
+    <div class="course-title">${l.titulo}</div>
+    ${curso ? `<div class="course-meta-row"><span class="course-meta-item">${curso.titulo}</span></div>` : ''}
+  </div>
+</div>`; }).join('');
+  }
+
+  // 7. FUNCIONES AUXILIARES
+  async function inscribirCurso(cursoId, btn) {
+    if (!currentUser) { window.location.href = 'index.html#/login'; return; }
+    const orig = btn.textContent;
+    btn.textContent = 'AÑADIENDO...'; btn.disabled = true;
+
+    // 1. Verificar si ya está inscrito
+    const { data: existing, error: checkError } = await _supabase
+      .from('Inscripciones')
+      .select('id')
+      .eq('usuario_id', currentUser.id)
+      .eq('curso_id', cursoId)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error al verificar inscripción:', checkError);
+      btn.textContent = 'ERROR'; btn.style.background = '#ef4444';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.disabled = false; }, 2500);
+      return;
+    }
+
+    if (existing) {
+      // Ya inscrito
+      btn.textContent = '✓ YA INSCRITO'; btn.style.background = '#6b7280';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.disabled = false; }, 2500);
+      return;
+    }
+
+    // 2. Insertar nueva inscripción
+    const { error: insertError } = await _supabase
+      .from('Inscripciones')
+      .insert([{ usuario_id: currentUser.id, curso_id: cursoId }]);
+
+    if (insertError) {
+      console.error('Error al inscribir:', insertError);
+      btn.textContent = 'ERROR'; btn.style.background = '#ef4444';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.disabled = false; }, 2500);
+      return;
+    }
+
+    btn.textContent = '✓ EN MIS ENTRENAMIENTOS'; btn.style.background = '#22c55e';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.disabled = false; }, 3000);
+    loadMyCourses();
+  }
+
+  function attachFilters() {
+    const filterBar = document.getElementById('explore-filters');
+    if (!filterBar || filterBar._filtersAttached) return;
+    filterBar._filtersAttached = true;
+    filterBar.addEventListener('click', e => {
+      const pill = e.target.closest('.cat-pill');
+      if (!pill) return;
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      // Sync tiles
+      document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('active-tile'));
+      const filter = pill.dataset.filter;
+      const matchTile = document.querySelector(`.cat-tile[data-cat="${filter}"]`);
+      if (matchTile) matchTile.classList.add('active-tile');
+      const banner = document.getElementById('nuevos-banner');
+      if (banner) banner.classList.toggle('visible', filter === 'nuevos');
+      document.querySelectorAll('#catalog-grid .course-card').forEach(card => {
+        const cats = (card.dataset.category || '').split(' ');
+        card.classList.toggle('hidden-filter', !cats.includes(filter));
+      });
+    });
+  }
+
+  document.getElementById('global-search')?.addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#catalog-grid .course-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.classList.toggle('hidden-filter', q.length > 0 && !text.includes(q));
+    });
+    if (q.length > 0 && document.getElementById('page-cursos') && !document.getElementById('page-cursos').classList.contains('active')) {
+      window.location.hash = '#/cursos';
+    }
+  });
+
+  // 8. VISOR FUNCTIONS
+  let currentLeccion = null;
+  let currentCursoLecciones = [];
+  let visorProgresoSet = new Set(); // leccion_ids completadas en este curso
+
+  async function loadVisor(cursoId) {
+    const [{ data: curso }, { data: lecciones }, { data: progreso }, { data: inscripciones }] = await Promise.all([
+      _supabase.from('Cursos').select('*').eq('id', cursoId).single(),
+      _supabase.from('Lecciones').select('*').eq('curso_id', cursoId).order('orden', { ascending: true }),
+      _supabase.from('Progreso').select('leccion_id').eq('usuario_id', currentUser?.id || '').eq('completado', true),
+      _supabase.from('Inscripciones').select('id').eq('usuario_id', currentUser?.id || '').eq('curso_id', cursoId)
+    ]);
+
+    if (!curso) return;
+    currentCursoLecciones = lecciones || [];
+    visorProgresoSet = new Set((progreso || []).map(p => p.leccion_id));
+
+    // Nombre del curso en el sidebar
+    document.getElementById('playlist-name').textContent = curso.titulo;
+
+    // Cargar stats del usuario en el sidebar
+    loadUserStatsCard(cursoId);
+
+    if (!lecciones || lecciones.length === 0) {
+      document.getElementById('current-video-title').textContent = curso.titulo;
+      document.getElementById('current-video-desc').textContent = 'Este curso no tiene lecciones disponibles aún.';
+      document.getElementById('playlist-container').innerHTML =
+        '<p style="padding:20px;font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;">Sin lecciones disponibles</p>';
+      return;
+    }
+
+    renderPlaylist(lecciones, cursoId);
+
+    // Continuar desde la última lección no completada, o la primera
+    const nextLeccion = lecciones.find(l => !visorProgresoSet.has(l.id)) || lecciones[0];
+    reproducirLeccion(nextLeccion);
+  }
+
+  async function loadUserStatsCard(cursoId) {
+    if (!currentUser) return;
+
+    // Nombre del usuario (ya cargado en perfil)
+    const nombreEl  = document.getElementById('visor-user-name');
+    const emailEl   = document.getElementById('visor-user-email');
+    const avatarEl  = document.getElementById('visor-avatar');
+
+    const { data: perfil } = await _supabase.from('Usuarios').select('nombre, apellido').eq('id', currentUser.id).single();
+    const nombre = perfil ? `${perfil.nombre || ''} ${perfil.apellido || ''}`.trim() : currentUser.email;
+    const initial = nombre.charAt(0).toUpperCase();
+    if (nombreEl) nombreEl.textContent = nombre || '—';
+    if (emailEl) emailEl.textContent = currentUser.email;
+    if (avatarEl) avatarEl.textContent = initial;
+
+    // Stats: clases completadas globales, cursos activos, % de este curso
+    const [{ data: totalProgreso }, { data: inscripciones }, { data: lecsDelCurso }] = await Promise.all([
+      _supabase.from('Progreso').select('id').eq('usuario_id', currentUser.id).eq('completado', true),
+      _supabase.from('Inscripciones').select('id').eq('usuario_id', currentUser.id),
+      _supabase.from('Lecciones').select('id').eq('curso_id', cursoId)
+    ]);
+
+    const totalCompletadas = totalProgreso?.length || 0;
+    const totalCursos      = inscripciones?.length || 0;
+    const totalLecs        = lecsDelCurso?.length || 0;
+    const donaEnCurso      = (lecsDelCurso || []).filter(l => visorProgresoSet.has(l.id)).length;
+    const pctCurso         = totalLecs > 0 ? Math.round((donaEnCurso / totalLecs) * 100) : 0;
+
+    const statComp  = document.getElementById('stat-completadas');
+    const statCurs  = document.getElementById('stat-cursos');
+    const statPct   = document.getElementById('stat-pct');
+    if (statComp) statComp.textContent = totalCompletadas;
+    if (statCurs) statCurs.textContent = totalCursos;
+    if (statPct)  statPct.textContent  = pctCurso + '%';
+  }
+
+  function renderPlaylist(lecciones, cursoId) {
+    const container = document.getElementById('playlist-container');
+
+    // Agrupar por sección
+    const sections = {};
+    lecciones.forEach((l, i) => {
+      const sec = l.seccion || 'Contenido';
+      if (!sections[sec]) sections[sec] = [];
+      sections[sec].push({ ...l, _idx: i });
+    });
+
+    let html = '';
+    Object.entries(sections).forEach(([secName, items]) => {
+      html += `<div class="playlist-section-hdr">${secName}</div>`;
+      items.forEach(l => {
+        const done   = visorProgresoSet.has(l.id);
+        const durMin = l.duracion_min ? `${l.duracion_min} min` : (l.duracion || '');
+        html += `
+<div class="playlist-item" id="pli-${l.id}" data-idx="${l._idx}" style="display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .2s;">
+  <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid ${done ? '#22c55e' : 'var(--line)'};background:${done ? '#22c55e' : 'transparent'};display:grid;place-items:center;flex-shrink:0;transition:all .2s;">
+    ${done
+      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+      : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);">${l._idx + 1}</span>`}
+  </div>
+  <div style="flex:1;min-width:0;">
+    <p style="font-size:13px;font-weight:600;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.titulo}</p>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin:0;text-transform:uppercase;">${durMin}</p>
+  </div>
+  ${done ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--line)" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'}
+</div>`;
+      });
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.playlist-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.idx, 10);
+        reproducirLeccion(currentCursoLecciones[idx]);
+      });
+    });
+
+    updateProgress(lecciones);
+  }
+
+  function reproducirLeccion(l) {
+    currentLeccion = l;
+    const iframe = document.getElementById('main-video');
+    let src = l.video_url || '';
+    const ytMatch = src.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\s?]+)/);
+    if (ytMatch) src = `https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
+    iframe.src = src;
+    document.getElementById('current-video-title').textContent = l.titulo;
+    document.getElementById('current-video-desc').textContent = l.descripcion || '';
+    const pdfBtn = document.getElementById('btn-pdf-download');
+    pdfBtn.style.display = l.pdf_url ? '' : 'none';
+    pdfBtn.onclick = () => window.open(l.pdf_url, '_blank');
+    // Highlight active
+    document.querySelectorAll('.playlist-item').forEach(el => el.style.background = '');
+    const activeEl = document.getElementById('pli-' + l.id);
+    if (activeEl) { activeEl.style.background = 'rgba(0,0,0,0.05)'; activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    // Sync "marcar completado" button state
+    const btn = document.getElementById('btn-completar');
+    if (btn) {
+      const done = visorProgresoSet.has(l.id);
+      btn.textContent = done ? '✓ COMPLETADO' : '✓ MARCAR COMO COMPLETADO';
+      btn.style.background = done ? '#22c55e' : '';
+    }
+  }
+
+  function abrirLeccion(leccionId, cursoId) {
+    window.location.hash = '#/visor?id=' + cursoId;
+  }
+
+  function updateProgress(lecciones) {
+    const done = lecciones.filter(l => visorProgresoSet.has(l.id)).length;
+    const pct  = lecciones.length ? Math.round((done / lecciones.length) * 100) : 0;
+    const bar  = document.getElementById('progress-bar');
+    const txt  = document.getElementById('progress-text');
+    if (bar) bar.style.width = pct + '%';
+    if (txt) txt.textContent = `${done} de ${lecciones.length} completadas · ${pct}%`;
+  }
+
+  document.getElementById('btn-completar')?.addEventListener('click', async () => {
+    if (!currentLeccion || !currentUser) return;
+    const lecId = currentLeccion.id;
+    const ya    = visorProgresoSet.has(lecId);
+    const btn   = document.getElementById('btn-completar');
+    btn.disabled = true;
+
+    if (ya) {
+      // Desmarcar
+      await _supabase.from('Progreso')
+        .update({ completado: false })
+        .eq('usuario_id', currentUser.id)
+        .eq('leccion_id', lecId);
+      visorProgresoSet.delete(lecId);
+    } else {
+      // Marcar como completada (upsert — tabla Progreso tiene UNIQUE)
+      await _supabase.from('Progreso').upsert(
+        [{ usuario_id: currentUser.id, leccion_id: lecId, completado: true, updated_at: new Date().toISOString() }],
+        { onConflict: 'usuario_id,leccion_id' }
+      );
+      visorProgresoSet.add(lecId);
+    }
+
+    btn.disabled = false;
+    reproducirLeccion(currentLeccion);
+    renderPlaylist(currentCursoLecciones, currentLeccion.curso_id);
+    // También sync localStorage como fallback
+    const key = `reforma_done_${currentUser.id}_${lecId}`;
+    ya ? localStorage.removeItem(key) : localStorage.setItem(key, '1');
+  });
+
+  async function loadUserProfile() {
+    if (!_supabase || !currentUser) return false;
+    try {
+      const { data, error } = await _supabase.from('Usuarios').select('*').eq('id', currentUser.id).single();
+      if (error || !data) {
+        console.warn("No se encontró perfil para este usuario — redirigiendo a completar perfil.");
+        return false;
+      }
+      const initialsEl = document.getElementById('user-initials');
+      if (initialsEl) initialsEl.innerText = data.nombre ? data.nombre.charAt(0).toUpperCase() : '?';
+      const emailEl = document.getElementById('display-email');
+      if (emailEl) emailEl.value = currentUser.email;
+      const form = document.getElementById('profile-form');
+      if (form) {
+        if (form.nombre)   form.nombre.value   = data.nombre   || '';
+        if (form.apellido) form.apellido.value  = data.apellido || '';
+        if (form.telefono) form.telefono.value  = data.telefono || '';
+        if (form.pais)     form.pais.value      = data.pais     || 'VE';
+        if (form.ciudad)   form.ciudad.value    = data.ciudad   || '';
+        if (form.proposito) form.proposito.value = data.proposito || '';
+      }
+      if (data.rol === 'admin') {
+        const adminSection = document.getElementById('sidebar-admin-section');
+        if (adminSection) adminSection.style.display = 'flex';
+      }
+      return true;
+    } catch (e) {
+      console.error('loadUserProfile error:', e);
+      return false;
+    }
+  }
+
+  const routes = {
+    '': 'page-cursos', '#/cursos': 'page-cursos', '#/entrenamientos': 'page-entrenamientos', 
+    '#/visor': 'page-visor', '#/ajustes': 'page-ajustes', '#/recursos': 'page-recursos', 
+    '#/soporte': 'page-soporte', '#/clases-grabadas': 'page-clases-grabadas'
+  };
+
+  function checkRouteAccess() {
+    const fullHash = window.location.hash || '';
+    const hash = fullHash.split('?')[0] || '';
+    const targetId = routes[hash] || 'page-cursos';
+    document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+    if (document.getElementById(targetId)) document.getElementById(targetId).classList.add('active');
+    document.querySelectorAll('.nav-item-app').forEach(nav => nav.classList.remove('active'));
+    const activeBtn = document.querySelector(`[onclick*="${hash}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    // Trigger visor load
+    if (hash === '#/visor') {
+      const params = new URLSearchParams(fullHash.split('?')[1] || '');
+      const id = params.get('id');
+      if (id) loadVisor(id);
+    }
+  }
+
+  async function handleLogout() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
+
+  document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const { error } = await _supabase.from('Usuarios').update({
+      nombre: form.nombre.value,
+      apellido: form.apellido.value,
+      telefono: form.telefono.value
+    }).eq('id', currentUser.id);
+    const saveBtn = form.querySelector('button[type="submit"]');
+    if (!error) {
+      saveBtn.textContent = '✓ GUARDADO';
+      saveBtn.style.background = '#22c55e';
+      setTimeout(() => { saveBtn.textContent = 'GUARDAR CAMBIOS'; saveBtn.style.background = ''; }, 2500);
+    } else {
+      saveBtn.textContent = 'ERROR AL GUARDAR';
+      saveBtn.style.background = '#E63946';
+      setTimeout(() => { saveBtn.textContent = 'GUARDAR CAMBIOS'; saveBtn.style.background = ''; }, 2500);
+    }
+  });
+
+  // ── CAMBIAR CONTRASEÑA ─────────────────────────────────────────
+  document.getElementById('form-cambiar-pass')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-cambiar-pass');
+    const pass  = document.getElementById('cp-nueva').value;
+    const pass2 = document.getElementById('cp-confirmar').value;
+    const err1  = document.getElementById('err-cp-nueva');
+    const err2  = document.getElementById('err-cp-confirmar');
+
+    err1.textContent = '';
+    err2.textContent = '';
+
+    if (pass.length < 6) { err1.textContent = 'Mínimo 6 caracteres.'; return; }
+    if (pass !== pass2)  { err2.textContent = 'Las contraseñas no coinciden.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'GUARDANDO...';
+
+    const { error } = await _supabase.auth.updateUser({ password: pass });
+
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = 'CAMBIAR CONTRASEÑA';
+      err1.textContent = 'Error: ' + (error.message || 'Inténtalo de nuevo.');
+      return;
+    }
+
+    btn.textContent = '✓ CONTRASEÑA ACTUALIZADA';
+    btn.style.background = '#22c55e';
+    document.getElementById('cp-nueva').value = '';
+    document.getElementById('cp-confirmar').value = '';
+    setTimeout(() => { btn.textContent = 'CAMBIAR CONTRASEÑA'; btn.style.background = ''; btn.disabled = false; }, 3000);
+  });
+
+  // ── SIDEBAR: desktop collapse / mobile drawer ──────────────────
+  const sidebar   = document.getElementById('app-sidebar');
+  const overlay   = document.getElementById('sidebar-overlay');
+  const btnToggle = document.getElementById('btn-toggle-sidebar');
+
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function openDrawer() {
+    overlay.style.display = 'block';
+    requestAnimationFrame(() => overlay.classList.add('open'));
+    sidebar.classList.add('drawer-open');
+  }
+
+  function closeDrawer() {
+    overlay.classList.remove('open');
+    sidebar.classList.remove('drawer-open');
+    setTimeout(() => { overlay.style.display = 'none'; }, 250);
+  }
+
+  btnToggle.addEventListener('click', () => {
+    if (isMobile()) {
+      sidebar.classList.contains('drawer-open') ? closeDrawer() : openDrawer();
+    } else {
+      document.body.classList.toggle('sidebar-collapsed');
+    }
+  });
+
+  overlay.addEventListener('click', closeDrawer);
+
+  // Cerrar drawer al navegar en mobile
+  window.addEventListener('hashchange', () => {
+    if (isMobile()) closeDrawer();
+    checkRouteAccess();
+  });
+
+  // ── PLAYLIST TOGGLE (mobile) ────────────────────────────────────
+  function togglePlaylist() {
+    const btn  = document.getElementById('playlist-toggle');
+    const wrap = document.getElementById('playlist-container-wrap');
+    btn.classList.toggle('collapsed');
+    wrap.classList.toggle('collapsed');
+  }
+
+  function syncPlaylistToggle() {
+    const btn = document.getElementById('playlist-toggle');
+    if (!btn) return;
+    btn.style.display = isMobile() ? 'flex' : 'none';
+  }
+
+  window.addEventListener('resize', syncPlaylistToggle);
+
+  window.addEventListener('load', () => {
+    syncPlaylistToggle();
+    initApp();
+  });
+</script>
+
+</body>
+</html>

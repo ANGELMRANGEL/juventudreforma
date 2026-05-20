@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REFORMA® | Acceso Administrativo</title>
+  <!-- No indexar por motores de búsqueda -->
+  <meta name="robots" content="noindex, nofollow" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◉</text></svg>" />
+  <style>
+    :root {
+      --ink: #0A0A0A;
+      --cream: #EDEDEB;
+      --muted: #6B6B6B;
+      --line: #D9D9D9;
+      --accent: #E63946;
+      --font-display: 'Helvetica Neue','Arial Black',sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: var(--font-display);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 24px;
+    }
+
+    /* GRAIN */
+    .grain {
+      position: fixed; top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      z-index: 0; pointer-events: none; opacity: 0.07;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px;
+      animation: grain-dance 0.4s steps(4) infinite;
+    }
+    @keyframes grain-dance {
+      0%  { transform: translate(0,0); }
+      25% { transform: translate(-2%,-2%); }
+      50% { transform: translate(1%,-1%); }
+      75% { transform: translate(-1%,2%); }
+      100%{ transform: translate(0,0); }
+    }
+
+    /* CARD */
+    .card {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 400px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 48px 40px;
+    }
+
+    /* LOGO */
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 40px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 10px; color: rgba(255,255,255,0.7);
+    }
+    .logo-text {
+      font-weight: 900; font-size: 15px;
+      letter-spacing: -0.02em; color: var(--cream);
+    }
+
+    /* BADGE */
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 16px;
+    }
+    .badge::before {
+      content: '●'; font-size: 6px;
+      animation: blink .8s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    h1 {
+      font-size: 28px; font-weight: 900;
+      letter-spacing: -.03em; text-transform: uppercase;
+      color: var(--cream); margin-bottom: 32px; line-height: 1.1;
+    }
+
+    /* FORM */
+    .form-group {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: .15em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+    }
+    input {
+      background: transparent;
+      border: none; border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 0;
+      color: var(--cream);
+      font-family: var(--font-display);
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus { border-color: rgba(255,255,255,0.6); }
+    input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* ERROR */
+    .err-msg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: .1em;
+      color: var(--accent); margin-top: 4px;
+      display: none;
+    }
+    .err-msg.visible { display: block; }
+
+    /* BUTTON */
+    .btn-submit {
+      width: 100%; margin-top: 12px;
+      background: var(--cream); color: var(--ink);
+      border: none; border-radius: 9999px;
+      padding: 14px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      font-weight: 700; cursor: pointer;
+      transition: opacity .2s, background .2s;
+    }
+    .btn-submit:hover { opacity: .85; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* FOOTER NOTE */
+    .footer-note {
+      margin-top: 32px; text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+    }
+    .footer-note a {
+      color: rgba(255,255,255,0.35);
+      text-decoration: none; transition: color .2s;
+    }
+    .footer-note a:hover { color: rgba(255,255,255,0.6); }
+
+    /* LOADER overlay */
+    #page-loader {
+      position: fixed; inset: 0;
+      background: var(--ink);
+      z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+      transition: opacity .4s, visibility .4s;
+    }
+    #page-loader.hidden { opacity: 0; visibility: hidden; }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-top-color: var(--cream);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-txt {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: .18em;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+      animation: blink .8s step-end infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Loader inicial (verifica sesión existente) -->
+<div id="page-loader">
+  <div class="spinner"></div>
+  <div class="loader-txt" id="loader-txt">Verificando acceso...</div>
+</div>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">◉</div>
+    <span class="logo-text">REFORMA®</span>
+  </div>
+
+  <div class="badge">Área restringida</div>
+  <h1>Acceso<br>Admin.</h1>
+
+  <form id="admin-form" novalidate>
+    <div class="form-group">
+      <label for="adm-email">Email</label>
+      <input type="email" id="adm-email" placeholder="admin@reforma.com" autocomplete="username" required />
+    </div>
+    <div class="form-group">
+      <label for="adm-pass">Contraseña</label>
+      <input type="password" id="adm-pass" autocomplete="current-password" required />
+    </div>
+    <div class="err-msg" id="adm-err">Credenciales inválidas o sin permisos de administrador.</div>
+    <button type="submit" class="btn-submit" id="adm-btn">ENTRAR AL PANEL</button>
+  </form>
+
+  <p class="footer-note">
+    ¿Eres alumno? <a href="index.html#/login">Ir al acceso normal →</a>
+  </p>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://vcshkwnjigughrkomaxa.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjc2hrd25qaWd1Z2hya29tYXhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTM2ODQsImV4cCI6MjA5NDQyOTY4NH0.zHJREGFx7rejpwuuXH6YwZhaHRER-OCci4bfiNm5ePU";
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const loader    = document.getElementById('page-loader');
+  const loaderTxt = document.getElementById('loader-txt');
+  const form      = document.getElementById('admin-form');
+  const errMsg    = document.getElementById('adm-err');
+  const btnSubmit = document.getElementById('adm-btn');
+
+  // Al cargar: si ya hay sesión activa y es admin, redirigir directamente
+  window.addEventListener('load', async () => {
+    try {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (session) {
+        const { data: perfil } = await _supabase
+          .from('Usuarios').select('rol').eq('id', session.user.id).single();
+        if (perfil?.rol === 'admin') {
+          loaderTxt.textContent = 'Redirigiendo al panel...';
+          window.location.href = 'admin.html';
+          return;
+        }
+        // Sesión existe pero no es admin — cerrar sesión y mostrar form
+        await _supabase.auth.signOut();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    loader.classList.add('hidden');
+  });
+
+  // Submit del formulario
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errMsg.classList.remove('visible');
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'VERIFICANDO...';
+
+    const email    = document.getElementById('adm-email').value.trim();
+    const password = document.getElementById('adm-pass').value;
+
+    try {
+      // 1. Iniciar sesión
+      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+      if (error || !data.session) {
+        showErr();
+        return;
+      }
+
+      // 2. Verificar rol admin
+      const { data: perfil } = await _supabase
+        .from('Usuarios').select('rol').eq('id', data.session.user.id).single();
+
+      if (perfil?.rol !== 'admin') {
+        // No es admin — cerrar sesión y mostrar error
+        await _supabase.auth.signOut();
+        showErr();
+        return;
+      }
+
+      // 3. Es admin → entrar al panel
+      loaderTxt.textContent = 'Acceso concedido. Cargando panel...';
+      loader.classList.remove('hidden');
+      window.location.href = 'admin.html';
+
+    } catch (err) {
+      console.error(err);
+      showErr();
+    }
+  });
+
+  function showErr() {
+    errMsg.classList.add('visible');
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'ENTRAR AL PANEL';
+    document.getElementById('adm-pass').value = '';
+    document.getElementById('adm-pass').focus();
+  }
+</script>
+
+</body>
+</html>
