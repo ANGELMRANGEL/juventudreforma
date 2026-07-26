@@ -15,3 +15,13 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Claude & Planes
+.claude/
+plan_*.md
+
+# Pruebas & Seeds
+test_db.php
+seed_*.php
+db_update.php
+*debug_db.php
