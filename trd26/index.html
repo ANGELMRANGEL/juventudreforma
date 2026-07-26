@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luminares TRD 2026 - Acceso</title>
+  <meta name="description" content="Accede a tu portal de inscripción para TRD 2026 - Luminares">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css?v=3.5">
+
+  <script src="https://accounts.google.com/gsi/client" onload="window.initializeGoogle && window.initializeGoogle()"
+    async defer></script>
+
+  <style>
+    .auth-card {
+      max-width: 390px;
+      margin: 0 auto;
+    }
+
+    /* Panel interior del card */
+    .auth-panel {
+      padding: 28px 24px 24px;
+    }
+
+    /* Hero bienvenida */
+    .auth-hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .auth-hero .auth-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: #2d3e85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 22px;
+      color: #ffffff;
+      box-shadow: 0 6px 18px rgba(45, 62, 133, 0.3);
+    }
+
+    .auth-hero h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .auth-hero p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 800;
+      line-height: 1.5;
+      font-family: 'JetBrains Mono';
+    }
+
+    /* Botón Google personalizado */
+    .btn-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      background: #ffffff;
+      color: #3c4043;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .btn-google:hover {
+      border-color: #dadce0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-google img {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .auth-divider span {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* Botón acceso manual */
+
+    .btn-email-access {
+      width: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 13px 16px;
+      border: 1.5px solid rgb(218 220 224);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.01);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin: auto;
+    }
+
+    .btn-email-access:hover {
+      border-color: #2d3e85;
+      color: #2d3e85;
+      background: rgba(45, 62, 133, 0.06);
+    }
+
+    .btn-email-access i {
+      font-size: 15px;
+      color: #2d3e85;
+    }
+
+    /* Manual view */
+    .auth-manual-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .btn-icon-back {
+      width: 34px;
+      height: 34px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      background: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-icon-back:hover {
+      border-color: #2d3e85;
+      color: #2d3e85;
+    }
+
+    .auth-manual-header-text h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .auth-manual-header-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Segmented tabs */
+    .auth-tabs {
+      display: flex;
+      padding: 3px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      margin-bottom: 22px;
+      gap: 2px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 9px 12px;
+      border: none;
+      border-radius: 8px;
+      background: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .auth-tab.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.09);
+    }
+
+    .form-field {
+      margin-bottom: 14px;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .auth-submit {
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    .auth-footer-note {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container"></div>
+
+  <div class="glowing-bg" aria-hidden="true">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <div class="container">
+    <header class="event-header">
+      <div class="logo-area">
+        <img src="../assets/img/trd2026.png" alt="TRD 2026" style="max-height: 30px; width: auto; display: block; margin: 0 auto 10px auto;">
+      </div>
+      <img src="../assets/img/lns_long.png" alt="Luminares" class="main-logo">
+    </header>
+
+    <main class="registration-card auth-card">
+      <div class="auth-panel">
+
+        <!-- ========== VISTA INICIAL ========== -->
+        <div id="initial-view">
+          <div class="auth-hero">
+            <p>Accede con Google a TRD 2026.</p>
+          </div>
+
+          <!-- Google Button Container (renderizado por SDK) -->
+          <div id="google-btn-container" style="display:flex; justify-content:center; margin-bottom: 4px;"></div>
+
+          <div class="auth-divider">
+            <span>O CONTINÚA CON CORREO</span>
+          </div>
+
+          <button type="button" id="btn-manual-flow" class="btn-email-access">
+            <i class="fa-regular fa-envelope"></i>
+            Acceder con correo
+          </button>
+
+          <p class="auth-footer-note">Al continuar aceptas los términos del evento. Tu información está protegida.</p>
+        </div>
+
+        <!-- ========== VISTA MANUAL ========== -->
+        <div id="manual-view" class="hidden">
+
+          <!-- Header de navegación -->
+          <div class="auth-manual-header">
+            <button type="button" id="btn-back-initial" class="btn-icon-back" title="Volver">
+              <i class="fa-solid fa-arrow-left" style="font-size:13px;"></i>
+            </button>
+            <div class="auth-manual-header-text">
+              <h3>Acceso Manual</h3>
+              <p>Usa tu correo electrónico para continuar</p>
+            </div>
+          </div>
+
+          <!-- Segmented Tabs -->
+          <div class="auth-tabs">
+            <button type="button" class="auth-tab active" data-tab="login">Iniciar sesión</button>
+            <button type="button" class="auth-tab" data-tab="register">Crear cuenta</button>
+          </div>
+
+          <!-- FORMULARIO: LOGIN -->
+          <form id="form-login" novalidate>
+            <div class="form-field">
+              <label for="login-email">Correo electrónico</label>
+              <input type="email" id="login-email" required placeholder="ejemplo@correo.com">
+            </div>
+            <div class="form-field">
+              <label for="login-password">Contraseña</label>
+              <input type="password" id="login-password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="submit-btn auth-submit" style="background: #2d3e85; color: #ffffff; font-weight: bold;">
+              <span>Ingresar</span>
+            </button>
+          </form>
+
+          <!-- FORMULARIO: REGISTRO -->
+          <form id="form-register" class="hidden" novalidate>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+              <div class="form-field" style="margin-bottom:0">
+                <label for="reg-nombre">Nombre</label>
+                <input type="text" id="reg-nombre" required placeholder="Juan">
+              </div>
+              <div class="form-field" style="margin-bottom:0">
+                <label for="reg-apellido">Apellido</label>
+                <input type="text" id="reg-apellido" required placeholder="Pérez">
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="reg-email">Correo electrónico</label>
+              <input type="email" id="reg-email" required placeholder="ejemplo@correo.com">
+            </div>
+            <div class="form-field">
+              <label for="reg-password">Contraseña</label>
+              <input type="password" id="reg-password" required placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="form-field">
+              <label for="reg-confirm-password">Confirmar contraseña</label>
+              <input type="password" id="reg-confirm-password" required placeholder="Repite tu contraseña">
+            </div>
+            <button type="submit" class="submit-btn auth-submit" style="background: #2d3e85; color: #ffffff; font-weight: bold;">
+              <span>Crear cuenta</span>
+            </button>
+          </form>
+
+        </div>
+        <!-- fin manual-view -->
+
+      </div>
+    </main>
+
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 5px;">
+      <a href="../" class="back-link"><i class="fa-solid fa-arrow-left"></i> VOLVER</a>
+    </div>
+
+    <footer class="main-footer">
+      <p>2026 Reforma - Luminares <span
+          style="font-size:10px; color:var(--text-muted); opacity:0.7; margin-left:8px;">(v2.2)</span></p>
+    </footer>
+  </div>
+
+  <script src="index.js?v=3.5"></script>
+</body>
+
+</html>

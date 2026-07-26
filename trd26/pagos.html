@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luminares TRD 2026 - Dashboard de Pagos</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css?v=3.5">
+</head>
+
+<body>
+  <div id="toast-container"></div>
+
+  <!-- Glowing Background Effect -->
+  <div class="glowing-bg" aria-hidden="true">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <div class="container">
+    <header class="event-header">
+      <div class="logo-area">
+        <img src="../assets/img/trd2026.png" alt="TRD 2026" style="max-height: 30px; width: auto; display: block; margin: 0 auto 10px auto;">
+      </div>
+      <img src="../assets/img/lns_long.png" alt="Luminares" class="main-logo">
+    </header>
+
+    <main class="registration-card">
+      <div id="pago-cuotas-container" style="padding: 10px 0;">
+        <div class="step-header" style="margin-bottom: 20px; text-align: center;">
+          <h3 style="font-weight: 800; font-size: 16px;">MI PORTAL DE PAGOS</h3>
+          <p style="font-weight: bold; color: var(--text-muted); font-size: 11px;" id="user-display-email"></p>
+        </div>
+
+        <div class="info-inscripcion-box" id="info-inscripcion-box"
+          style="background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 13px; line-height: 1.6;">
+          Cargando información del registro...
+        </div>
+
+        <form id="pago-cuotas-form" style="display: none;" novalidate>
+          <!-- SUB-PASO 1: SELECCIÓN DE MÉTODO DE PAGO -->
+          <div id="cuotas-substep-1">
+            <label
+              style="display: block; margin-bottom: 12px; font-weight: 600; color: var(--text-main); text-align: center;">Selecciona
+              un Método de Pago</label>
+            <div class="payment-grid">
+              <button type="button" class="btn-payment" data-method="Pago Móvil">
+                <img src="/assets/img/pmbancamiga.png" alt="Pago Móvil" style="height: 30px; margin: 0 auto;">
+              </button>
+              <button type="button" class="btn-payment" data-method="Binance">
+                <img src="/assets/img/binance.png" alt="Binance">
+              </button>
+              <button type="button" class="btn-payment" data-method="Zinli">
+                <img src="/assets/img/zinli.png" alt="Zinli" style="height: 22px; margin: 0 auto; transform: translateY(-2px);">
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-PASO 2: FORMULARIO Y DETALLES DE CUENTA -->
+          <div id="cuotas-substep-2" class="hidden">
+            <!-- Datos cuenta destino -->
+            <div id="cuotas-payment-info"
+              style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);">
+            </div>
+
+            <!-- Campos ocultos de moneda y metodo -->
+            <input type="hidden" id="moneda_cuota" name="moneda">
+            <input type="hidden" id="metodo_pago_cuota" name="metodo_pago">
+
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+              <div>
+                <label>Concepto de Pago</label>
+                <div id="concepto-pago-checks" style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;"></div>
+                <input type="hidden" id="tipo_pago_cuota" name="tipo_pago" required>
+              </div>
+
+              <div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <div>
+                    <label for="monto_cuota">Monto ($ USD)</label>
+                    <input type="number" id="monto_cuota" name="monto" required min="1" step="0.01"
+                      style="font-family: 'JetBrains Mono', monospace; font-weight: bold;" placeholder="0.00">
+                  </div>
+                  <div>
+                    <label for="monto_bs">Equivalente (Bs.)</label>
+                    <input type="text" id="monto_bs" readonly placeholder="—"
+                      style="font-family: 'JetBrains Mono', monospace; font-weight: bold; background: rgba(0,0,0,0.04); cursor: not-allowed; color: var(--accent-gold);">
+                  </div>
+                </div>
+                <p id="ayuda-bcv-calculo"
+                  style="font-size: 10px; color: var(--accent-gold); font-weight: bold; margin-top: 5px; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                </p>
+              </div>
+
+
+              <div>
+                <label for="referencia_cuota">Referencia</label>
+                <input type="text" id="referencia_cuota" name="referencia" required placeholder="Últimos 6 u 8 dígitos">
+              </div>
+
+              <div>
+                <label>Capture de Pago</label>
+                <div class="file-upload-wrapper" id="file-upload-wrapper-cuota"
+                  style="border: 2px dashed var(--border-color); border-radius: 12px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(0,0,0,0.01); position: relative;">
+                  <input type="file" id="comprobante_imagen_cuota" name="comprobante_imagen" accept="image/*" required
+                    style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                  <div id="upload-content-cuota"
+                    style="display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;">
+                    <i class="fa-solid fa-cloud-arrow-up"
+                      style="font-size: 28px; color: var(--accent-gold); opacity: 0.8;"></i>
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-main);">SUBE TU CAPTURE</span>
+                    <span style="font-size: 9px; color: var(--text-muted);">Soporta PNG, JPG, JPEG (máx 5MB)</span>
+                  </div>
+                  <div id="preview-container-cuota" style="display: none; pointer-events: none;">
+                    <img id="image-preview-cuota" src="" alt="Vista previa del capture"
+                      style="max-height: 140px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin: 0 auto;">
+                    <span
+                      style="display: block; font-size: 10px; color: var(--success); font-weight: bold; margin-top: 8px;"><i
+                        class="fa-solid fa-circle-check"></i> Capture cargado exitosamente</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-cuota-btn"
+              style="margin-top: 25px; width: 100%; background: #ffffff; color: #2d3e85; font-weight: bold;">
+              <span>ENVIAR REPORTE</span> <i class="fa-solid fa-paper-plane"></i>
+            </button>
+
+            <!-- Botón Volver -->
+            <div style="text-align: center; margin-top: 20px;">
+              <button type="button" id="btn-volver-substep-1" class="btn-control"
+                style="font-size: 11px; padding: 8px 16px;">
+                <i class="fa-solid fa-arrow-left"></i> Cambiar Método
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 5px;">
+      <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> VOLVER</a>
+    </div>
+
+    <footer class="main-footer">
+      <p>2026 Reforma - Luminares <span
+          style="font-size: 10px; color: var(--text-muted); opacity: 0.7; margin-left: 8px;">(v1.9)</span></p>
+    </footer>
+  </div>
+
+  <script>
+    // Copy helper
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast success';
+        toast.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Copiado al portapapeles</span>';
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      });
+    }
+  </script>
+  <script src="qr.js"></script>
+  <script src="pagos.js?v=3.5"></script>
+</body>
+
+</html>

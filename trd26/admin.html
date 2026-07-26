@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Administrativo | TRD 2026</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="admin.css?v=3.5">
+
+  <!-- Google GSI Client Library -->
+  <script src="https://accounts.google.com/gsi/client" onload="initializeGoogle()" async defer></script>
+  <script src="qr.js"></script>
+
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 20px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+      color: var(--accent-gold);
+    }
+
+    .tab-btn.active {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+      background: rgba(251, 191, 36, 0.05);
+    }
+
+    .admin-panel {
+      display: none;
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge.pendiente {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--accent-gold);
+      border: 1px solid var(--accent-gold);
+    }
+
+    .badge.verificado {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .badge.rechazado {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid var(--error);
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.3s;
+    }
+
+    .action-btn.approve:hover {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .action-btn.reject:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+      border-color: var(--error);
+    }
+
+    /* Login Form Specific */
+    .login-card {
+      max-width: 400px;
+      margin: 80px auto;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      float: right;
+      transition: all 0.3s;
+    }
+
+    .logout-btn:hover {
+      color: var(--error);
+      border-color: var(--error);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container"></div>
+
+  <div class="glowing-bg" aria-hidden="true">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <!-- VISTA DE LOGIN -->
+  <div id="login-view" style="display: none; width: 100%; max-width: 450px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000;">
+    <header class="event-header" style="text-align: center; margin-bottom: 25px;">
+      <div class="logo-area" style="margin-bottom: 15px; display: flex; justify-content: center;">
+        <img src="../assets/img/trd2026.png" alt="TRD 2026" style="max-height: 30px; width: auto; display: block; margin: 0 auto 10px auto;">
+      </div>
+      <img src="../assets/img/lns_long.png" alt="Luminares" class="main-logo" style="max-height: 45px; width: auto; display: block; margin: 0 auto;">
+    </header>
+
+    <main class="registration-card auth-card" style="background: #ffffff; color: #1f2937; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 40px; text-align: center;">
+      <div class="auth-panel">
+        <div class="auth-hero" style="margin-bottom: 25px;">
+          <h2 style="font-size: 19px; font-weight: 800; color: #1f2937; margin-bottom: 6px; letter-spacing: -0.3px; font-family: 'Plus Jakarta Sans', sans-serif;">ACCESO ADMINISTRATIVO</h2>
+          <p style="font-size: 11px; color: #4b5563; line-height: 1.5; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-transform: uppercase;">Accede con tu cuenta de administrador de Google de Reforma.</p>
+        </div>
+
+        <!-- Google Button Container (renderizado por SDK) -->
+        <div id="google-btn-registro" style="display:flex; justify-content:center; margin-bottom: 4px;"></div>
+      </div>
+    </main>
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+      <a href="../" class="back-link" style="font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; color: #ffffff; text-decoration: none; letter-spacing: 2px; border: 1px solid #c3ccf3; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; background: rgba(255, 255, 255, 0.05); display: inline-flex; align-items: center; gap: 8px;"><i class="fa-solid fa-arrow-left"></i> VOLVER</a>
+    </div>
+
+    <footer class="main-footer" style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px;">
+      <p>2026 Reforma - Luminares <span style="font-size:10px; color:rgba(255, 255, 255, 0.4); margin-left:8px;">(v2.2)</span></p>
+    </footer>
+  </div>
+
+  <!-- VISTA DE CONTENIDO ADMINISTRATIVO -->
+  <div id="admin-view" class="admin-container" style="display: none;">
+    <header
+      style="margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; position: relative; min-height: 45px;">
+      <img src="../assets/img/trd2026.png" alt="TRD 2026" style="max-height: 30px; width: auto; display: block; margin: 0;">
+      <img src="../assets/img/lns_long.png" alt="Luminares" style="max-height: 40px; width: auto; display: block; margin: 0; position: absolute; left: 50%; transform: translateX(-50%);">
+      <button id="logout-btn" class="logout-btn" style="display: none;"><i class="fa-solid fa-power-off"></i> CERRAR
+        SESIÓN</button>
+    </header>
+
+    <nav class="nav-tabs" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="tab-btn active" data-target="panel-inscritos"><i class="fa-solid fa-users"></i> INSCRITOS</button>
+            <button class="tab-btn" data-target="panel-validar"><i class="fa-solid fa-money-bill-transfer"></i> PAGOS</button>
+            <button class="tab-btn" data-target="panel-financiados"><i class="fa-solid fa-credit-card"></i> FINANCIADOS</button>
+            <button class="tab-btn" data-target="panel-pagado"><i class="fa-solid fa-circle-check"></i> 100% PAGADO</button>
+            <button class="tab-btn" data-target="panel-cupones"><i class="fa-solid fa-ticket"></i> CUPONES</button>
+            <button class="tab-btn" data-target="panel-usuarios"><i class="fa-solid fa-user-shield"></i> USUARIOS</button>
+        </div>
+        <button id="global-export-btn" onclick="exportActiveTable()" class="action-btn approve"
+           style="padding: 10px 16px; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
+           <i class="fas fa-file-csv"></i> Exportar
+        </button>
+    </nav>
+
+    <!-- PANEL 1: VALIDAR PAGOS -->
+    <section id="panel-validar" class="admin-panel">
+      <div
+        style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="search-validar" placeholder="Buscar por usuario, ref, concepto..."
+            onkeyup="filterTable('table-validar')"
+            style="width: 320px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none;">
+          <select id="filter-validar-estado" onchange="filterTable('table-validar')"
+            style="width: 145px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 11px; outline: none; cursor: pointer;">
+            <option value="todos">Todos los estados</option>
+            <option value="Pendiente" selected>Pendientes</option>
+            <option value="Verificado">Aprobados</option>
+            <option value="Rechazado">Rechazados</option>
+          </select>
+        </div>
+        <div id="count-validar" style="font-family: 'JetBrains Mono', monospace; color: var(--accent-gold); font-size: 11px; font-weight: 600;"></div>
+      </div>
+      <div class="table-container">
+        <table id="table-validar">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Plan</th>
+              <th>Concepto</th>
+              <th>Monto</th>
+              <th>Método</th>
+              <th>Ref</th>
+              <th>Capture</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rellenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PANEL: INSCRITOS -->
+    <section id="panel-inscritos" class="admin-panel active">
+      <div
+        style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="search-inscritos" placeholder="Buscar por nombre, correo, congregación..."
+            onkeyup="filterTable('table-inscritos')"
+            style="width: 320px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none;">
+          <select id="filter-inscritos-plan" onchange="updateSubFilterOptions(); filterTable('table-inscritos')"
+            style="width: 145px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 11px; outline: none; cursor: pointer;">
+            <option value="todos">Todos los planes</option>
+            <option value="Completo">Pago Completo</option>
+            <option value="Financiado">Plan Financiado</option>
+          </select>
+          <select id="filter-inscritos-status" onchange="filterTable('table-inscritos')"
+            style="width: 145px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 11px; outline: none; cursor: pointer; display: none;">
+          </select>
+        </div>
+        <div id="count-inscritos" style="font-family: 'JetBrains Mono', monospace; color: var(--accent-gold); font-size: 11px; font-weight: 600;"></div>
+      </div>
+      <div class="table-container">
+        <table id="table-inscritos">
+          <thead>
+            <tr>
+              <th>Participante</th>
+              <th>Sede</th>
+              <th>Iglesia / Pastor / Servicio</th>
+              <th>Plan</th>
+              <th>Pagos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rellenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PANEL 2: PARTICIPANTES FINANCIADOS -->
+    <section id="panel-financiados" class="admin-panel">
+      <div
+        style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="search-financiados" placeholder="Buscar por nombre, correo, congregación..."
+            onkeyup="filterTable('table-financiados')"
+            style="width: 320px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none;">
+        </div>
+        <div id="count-financiados" style="font-family: 'JetBrains Mono', monospace; color: var(--accent-gold); font-size: 11px; font-weight: 600;"></div>
+      </div>
+      <div class="table-container">
+        <table id="table-financiados">
+          <thead>
+            <tr>
+              <th>Participante</th>
+              <th>Sede</th>
+              <th>Iglesia / Pastor / Servicio</th>
+              <th>Total Abonado ($)</th>
+              <th>Restante ($)</th>
+              <th>Historial de Pagos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rellenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PANEL 3: 100% PAGADO -->
+    <section id="panel-pagado" class="admin-panel">
+      <div
+        style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="search-pagado" placeholder="Buscar por nombre, correo, congregación..."
+            onkeyup="filterTable('table-pagado')"
+            style="width: 320px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none;">
+        </div>
+        <div id="count-pagado" style="font-family: 'JetBrains Mono', monospace; color: var(--accent-gold); font-size: 11px; font-weight: 600;"></div>
+      </div>
+      <div class="table-container">
+        <table id="table-pagado">
+          <thead>
+            <tr>
+              <th>Participante</th>
+              <th>Sede</th>
+              <th>Iglesia / Pastor / Servicio</th>
+              <th>Plan Inicial</th>
+              <th>Total Abonado ($)</th>
+              <th>Historial de Pagos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rellenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="panel-cupones" class="admin-panel">
+      <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px;">
+        <form id="cupon-form" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+          <div style="flex: 0 0 120px; display: flex; flex-direction: column; gap: 6px;">
+            <label for="cupon-cantidad" style="font-size: 12px; font-weight: 600; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Cantidad</label>
+            <input type="number" id="cupon-cantidad" min="1" max="100" placeholder="0" required
+              style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none; text-align: center;">
+          </div>
+          <div style="flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 6px;">
+            <label for="cupon-descuento" style="font-size: 12px; font-weight: 600; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Monto de Descuento (USD)</label>
+            <input type="number" id="cupon-descuento" min="1" step="0.01" required placeholder="0"
+              style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none;">
+          </div>
+          <div style="flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 6px;">
+            <label for="cupon-expiracion" style="font-size: 12px; font-weight: 600; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif;">Fecha de Expiración</label>
+            <input type="date" id="cupon-expiracion" required
+              style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none; cursor: pointer;">
+          </div>
+          <button type="submit" class="action-btn approve" style="padding: 10px 24px; border-radius: 8px; font-weight: bold; font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; height: 41px;">
+            <i class="fa-solid fa-layer-group"></i> GENERAR LOTE
+          </button>
+        </form>
+      </div>
+
+      <div class="table-container">
+        <table id="table-cupones">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descuento (USD)</th>
+              <th>Expiración</th>
+              <th>Uso Único</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rellenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PANEL 5: USUARIOS -->
+    <section id="panel-usuarios" class="admin-panel">
+      <div
+        style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; align-items: center; position: relative;">
+          <input type="text" id="search-usuarios" placeholder="Buscar usuario para hacerlo Admin..." oninput="searchUsersToPromote()"
+            style="width: 320px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-main); font-size: 13px; outline: none; box-sizing: border-box;">
+          <!-- Floating search results -->
+          <div id="usuarios-search-results" style="position: absolute; top: 100%; left: 0; width: 320px; background: #ffffff; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; max-height: 200px; overflow-y: auto; display: none; margin-top: 5px;"></div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="table-usuarios">
+          <thead>
+            <tr>
+              <th>Administrador</th>
+              <th>Email</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rellenado dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Callback al recibir credenciales de Google
+    async function handleCredentialResponse(response) {
+      try {
+        if (window.showToastGlobal) {
+          window.showToastGlobal('Autenticando con Google...', 'success');
+        }
+
+        const res = await fetch('../api/auth.php?action=google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: response.credential })
+        });
+
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Error de autenticación');
+
+        // Validar si el usuario tiene rol de admin
+        if (result.user && result.user.rol === 'admin') {
+          if (window.showToastGlobal) window.showToastGlobal('Sesión iniciada correctamente', 'success');
+          if (window.checkSessionGlobal) window.checkSessionGlobal();
+        } else {
+          // Si no es admin, cerrar la sesión creada para evitar que quede logueado en la sesión
+          await fetch('../api/auth.php?action=logout', { method: 'POST' }).catch(() => { });
+          throw new Error('Tu usuario de Google no tiene permisos de administrador.');
+        }
+      } catch (e) {
+        if (window.showToastGlobal) window.showToastGlobal(e.message, 'error');
+        else alert(e.message);
+      }
+    }
+
+    // Inicializar Google Identity Services
+    window.initializeGoogle = function () {
+      if (typeof google !== 'undefined') {
+        try {
+          google.accounts.id.initialize({
+            client_id: '894522360681-pfuptfhtithl6kb28uj9mci3i5hbdk5k.apps.googleusercontent.com',
+            callback: handleCredentialResponse
+          });
+
+          const regEl = document.getElementById('google-btn-registro');
+          if (regEl) {
+            google.accounts.id.renderButton(regEl, {
+              theme: 'outline',
+              size: 'large',
+              text: 'signup_with',
+              shape: 'rectangular',
+              width: 320
+            });
+          }
+        } catch (e) {
+          console.error('Error initializing Google Sign-In:', e);
+        }
+      }
+    };
+
+    // Si ya cargó la librería de Google, inicializar de inmediato
+    if (typeof google !== 'undefined') {
+      window.initializeGoogle();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginView = document.getElementById('login-view');
+      const adminView = document.getElementById('admin-view');
+      const cuponForm = document.getElementById('cupon-form');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      // Sistema de Toasts
+      function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+      }
+
+      window.showToastGlobal = showToast;
+
+      // Manejo de pestañas
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.target).classList.add('active');
+          
+          const exportBtn = document.getElementById('global-export-btn');
+          if (exportBtn) {
+            exportBtn.style.display = (btn.dataset.target === 'panel-cupones' || btn.dataset.target === 'panel-usuarios') ? 'none' : '';
+          }
+        });
+      });
+
+      // Validar Sesión
+      async function checkSession() {
+        try {
+          const res = await fetch('../api/auth.php?action=session');
+          const data = await res.json();
+          
+          if (data && data.session && data.session.user && data.session.user.rol === 'admin') {
+            loginView.style.display = 'none';
+            adminView.style.display = 'block';
+            logoutBtn.style.display = 'block';
+            loadInscripciones();
+            loadCupones();
+            loadUsuarios();
+          } else {
+            loginView.style.display = 'block';
+            adminView.style.display = 'none';
+            logoutBtn.style.display = 'none';
+          }
+        } catch (err) {
+          console.error('Session check error:', err);
+          loginView.style.display = 'block';
+          adminView.style.display = 'none';
+          logoutBtn.style.display = 'none';
+        }
+      }
+
+      window.checkSessionGlobal = checkSession;
+
+      // Si ya cargó la librería de Google, intentar renderizar el botón
+      if (typeof google !== 'undefined') {
+        window.initializeGoogle();
+      }
+      // Logout
+      logoutBtn.addEventListener('click', async () => {
+        await fetch('../api/auth.php?action=logout', { method: 'POST' }).catch(() => { });
+        showToast('Sesión cerrada');
+        checkSession();
+      });
+
+      // Cargar Inscripciones
+      async function loadInscripciones() {
+        try {
+          const res = await fetch('api/admin.php?action=get_inscripciones');
+          const data = await res.json();
+
+          const tbodyValidar = document.querySelector('#table-validar tbody');
+          const tbodyInscritos = document.querySelector('#table-inscritos tbody');
+          const tbodyFinanciados = document.querySelector('#table-financiados tbody');
+          const tbodyPagado = document.querySelector('#table-pagado tbody');
+
+          tbodyValidar.innerHTML = '';
+          tbodyInscritos.innerHTML = '';
+          tbodyFinanciados.innerHTML = '';
+          tbodyPagado.innerHTML = '';
+
+          data.forEach(insc => {
+            // Calcular total de pagos aprobados (Verificado)
+            let totalVerificado = 0;
+            insc.pagos.forEach(p => {
+              if (p.estado === 'Verificado') {
+                totalVerificado += parseFloat(p.monto);
+              }
+            });
+
+            // Se considera 100% pagado si:
+            // - El plan es Contado/Completo y tiene al menos un pago Verificado.
+            // - O el total de pagos Verificados es >= 30 (o >= 20 si tiene cupón).
+            const is100PercentPaid = (
+              ((insc.plan_pago === 'Contado' || insc.plan_pago === 'Completo') && totalVerificado > 0) || 
+              (totalVerificado >= 30.00) ||
+              (insc.codigo_promocional && totalVerificado >= 20.00)
+            );
+
+            const getWaBtn = (tabType) => {
+              if (!insc.whatsapp) return '';
+              let cleanWa = insc.whatsapp.toString().replace(/\D/g, '');
+              if (cleanWa.startsWith('0')) {
+                cleanWa = '58' + cleanWa.substring(1);
+              } else if (!cleanWa.startsWith('58') && cleanWa.length === 10) {
+                cleanWa = '58' + cleanWa;
+              }
+              
+              let msg = '';
+              if (tabType === 'validar') {
+                msg = `Hola! ${insc.nombre} ${insc.apellido}. Te escribimos de Reforma Luminares con respecto al reporte de tu pago. ¿Podríamos verificar un detalle del comprobante?`;
+              } else if (tabType === 'financiados') {
+                msg = `Hola! ${insc.nombre} ${insc.apellido}. Te escribimos de Reforma Luminares para recordarte que tienes una cuota pendiente del financiamiento de tu inscripción a TRD 2026. ¿Nos podrías confirmar el reporte del pago?`;
+              } else if (tabType === 'pagado') {
+                msg = `Hola! ${insc.nombre} ${insc.apellido}. Te escribimos de Reforma Luminares para saludarte y darte la bienvenida oficial. ¡Ya tu inscripción a TRD 2026 se encuentra 100% pagada!`;
+              }
+              
+              if (tabType === 'pagado') {
+                return `
+                  <a href="javascript:void(0)" onclick="event.stopPropagation(); sendWhatsAppWithQr('${insc.nombre.replace(/'/g, "\\'")}', '${insc.apellido.replace(/'/g, "\\'")}', '${insc.email.replace(/'/g, "\\'")}', '${cleanWa}', '${encodeURIComponent(msg)}')" style="color: #259570; margin-left: 6px; font-size: 14px; vertical-align: middle; text-decoration: none; position: relative; top: -2px;" title="Enviar Pase QR por WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i>
+                  </a>
+                `;
+              }
+
+              return `
+                <a href="https://wa.me/${cleanWa}?text=${encodeURIComponent(msg)}" target="_blank" style="color: #259570; margin-left: 6px; font-size: 14px; vertical-align: middle; text-decoration: none; position: relative; top: -2px;" title="Contactar por WhatsApp">
+                  <i class="fa-brands fa-whatsapp"></i>
+                </a>
+              `;
+            };
+
+            // Construir resumen de pagos
+            let pagosSummary = '';
+            if (insc.pagos.length === 0) {
+              pagosSummary = '<span style="color:var(--text-muted); font-size:11px;">Sin pagos reportados</span>';
+            } else {
+              pagosSummary = insc.pagos.map(p => {
+                let badgeClass = 'pendiente';
+                if (p.estado === 'Verificado') badgeClass = 'verificado';
+                if (p.estado === 'Rechazado') badgeClass = 'rechazado';
+                return `
+                  <span class="badge ${badgeClass}" style="font-size: 10px; padding: 2px 6px; margin: 1px; display: inline-block;">
+                    ${p.tipo_pago || 'Pago'}: $${p.monto}
+                  </span>
+                `;
+              }).join('');
+            }
+
+            // 1. Agregar pagos al listado de validación
+            insc.pagos.forEach(p => {
+              const ref6 = p.referencia ? p.referencia.slice(-6) : '-';
+              const trPago = document.createElement('tr');
+              trPago.dataset.estado = p.estado;
+              trPago.innerHTML = `
+                <td>
+                  <strong>${insc.nombre} ${insc.apellido}</strong>${getWaBtn('validar')}<br>
+                  <span style="color:var(--text-muted); font-size:11px;">${insc.email}</span>
+                </td>
+                <td>${(insc.plan_pago === 'Contado' || insc.plan_pago === 'Completo') ? 'Completo' : 'Financiado'}</td>
+                <td><strong>${p.tipo_pago || 'Pago'}</strong></td>
+                <td>$${p.monto}</td>
+                <td>${p.metodo_pago}</td>
+                <td>${ref6}</td>
+                <td>
+                  ${p.comprobante_imagen ? `
+                    <a href="javascript:void(0)" onclick="openImageViewer('../uploads/pagos/${p.comprobante_imagen}')" style="color: var(--accent-gold); text-decoration: underline; font-weight: bold;">
+                      <i class="fa-solid fa-image"></i> Ver Capture
+                    </a>
+                  ` : `
+                    <span style="color: var(--text-muted); font-size: 10px;"><i class="fa-solid fa-image-slash"></i> Sin capture</span>
+                  `}
+                </td>
+                <td>
+                  <span class="badge ${p.estado.toLowerCase()}">${p.estado}</span>
+                  ${p.estado === 'Pendiente' ? `
+                    <div style="margin-top: 4px; display: flex; gap: 4px;">
+                      <button class="action-btn approve" onclick="verificarPago(${p.pago_id}, 'Verificado')">Aprobar</button>
+                      <button class="action-btn reject" onclick="verificarPago(${p.pago_id}, 'Rechazado')">Rechazar</button>
+                    </div>
+                  ` : `
+                    <div style="margin-top: 4px;">
+                      <button class="action-btn reject" style="background:var(--border-color); color:var(--text-main);" onclick="verificarPago(${p.pago_id}, 'Pendiente')"><i class="fas fa-undo"></i> Revertir</button>
+                    </div>
+                  `}
+                </td>
+              `;
+              trPago.style.cursor = 'pointer';
+              trPago.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button') || e.target.closest('i')) return;
+                openEditPagoModal(p);
+              });
+              tbodyValidar.appendChild(trPago);
+            });
+
+            // 2. Agregar participante al listado correspondiente
+            const trParticipant = document.createElement('tr');
+            if (is100PercentPaid) {
+              // Va a la pestaña 100% Pagados
+              let cleanWa = '';
+              if (insc.whatsapp) {
+                cleanWa = insc.whatsapp.toString().replace(/\D/g, '');
+                if (cleanWa.startsWith('0')) {
+                  cleanWa = '58' + cleanWa.substring(1);
+                } else if (!cleanWa.startsWith('58') && cleanWa.length === 10) {
+                  cleanWa = '58' + cleanWa;
+                }
+              }
+              const qrMsg = `Hola! ${insc.nombre} ${insc.apellido}. Te hacemos llegar tu pase de acceso QR para TRD 2026. ¡Nos vemos pronto!`;
+              trParticipant.innerHTML = `
+                <td>
+                  <strong>${insc.nombre} ${insc.apellido}</strong>${getWaBtn('pagado')}<br>
+                  <span style="color:var(--text-muted); font-size:11px;">${insc.email}</span>
+                </td>
+                <td>${insc.nombre_evento.replace('Trasciende 2026 - ', '')}</td>
+                <td>
+                  <strong>Iglesia:</strong> ${insc.congregacion || '-'}<br>
+                  <strong>Pastor:</strong> ${insc.red_pastoral || '-'}<br>
+                  <strong>Servicio:</strong> ${insc.funcion_congregacion || '-'}
+                </td>
+                <td>${(insc.plan_pago === 'Contado' || insc.plan_pago === 'Completo') ? 'Completo' : 'Financiado'}</td>
+                <td><strong>$${totalVerificado.toFixed(2)}</strong></td>
+                <td>${pagosSummary}</td>
+                <td>
+                  ${cleanWa ? `<button class="action-btn qr-trigger" style="background: #10b981; color: white; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; font-weight: bold; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer;" onclick="event.stopPropagation(); sendWhatsAppWithQr('${insc.nombre.replace(/'/g, "\\'")}', '${insc.apellido.replace(/'/g, "\\'")}', '${insc.email.replace(/'/g, "\\'")}', '${cleanWa}', '${encodeURIComponent(qrMsg)}')"><i class="fa-solid fa-qrcode"></i> ENVIAR QR</button>` : ''}
+                </td>
+              `;
+              trParticipant.style.cursor = 'pointer';
+              trParticipant.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button') || e.target.closest('i')) return;
+                openEditInscripcionModal(insc);
+              });
+              tbodyPagado.appendChild(trParticipant);
+            } else if (insc.plan_pago === 'Financiado') {
+              // Va a la pestaña Financiados (cualquiera con deuda pendiente)
+              const totalDeuda = insc.codigo_promocional ? 20.00 : 30.00;
+              const restante = Math.max(0, totalDeuda - totalVerificado);
+              let cleanWa = '';
+              if (insc.whatsapp) {
+                cleanWa = insc.whatsapp.toString().replace(/\D/g, '');
+                if (cleanWa.startsWith('0')) {
+                  cleanWa = '58' + cleanWa.substring(1);
+                } else if (!cleanWa.startsWith('58') && cleanWa.length === 10) {
+                  cleanWa = '58' + cleanWa;
+                }
+              }
+              const qrMsg = `Hola! ${insc.nombre} ${insc.apellido}. Te hacemos llegar tu pase de acceso QR para TRD 2026. ¡Nos vemos pronto!`;
+              trParticipant.innerHTML = `
+                <td>
+                  <strong>${insc.nombre} ${insc.apellido}</strong>${getWaBtn('financiados')}<br>
+                  <span style="color:var(--text-muted); font-size:11px;">${insc.email}</span>
+                </td>
+                <td>${insc.nombre_evento.replace('Trasciende 2026 - ', '')}</td>
+                <td>
+                  <strong>Iglesia:</strong> ${insc.congregacion || '-'}<br>
+                  <strong>Pastor:</strong> ${insc.red_pastoral || '-'}<br>
+                  <strong>Servicio:</strong> ${insc.funcion_congregacion || '-'}
+                </td>
+                <td><strong>$${totalVerificado.toFixed(2)}</strong></td>
+                <td style="color: var(--accent-gold); font-weight: bold;">$${restante.toFixed(2)}</td>
+                <td>${pagosSummary}</td>
+                <td>
+                  ${cleanWa ? `
+                    <button class="action-btn qr-trigger" style="background: #10b981; color: white; font-size: 10px; padding: 4px 8px; font-weight: bold; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; margin: 0;" onclick="event.stopPropagation(); sendWhatsAppWithQr('${insc.nombre.replace(/'/g, "\\'")}', '${insc.apellido.replace(/'/g, "\\'")}', '${insc.email.replace(/'/g, "\\'")}', '${cleanWa}', '${encodeURIComponent(qrMsg)}')">
+                      <i class="fa-solid fa-paper-plane"></i> ENVIAR QR
+                    </button>
+                  ` : ''}
+                </td>
+              `;
+              trParticipant.style.cursor = 'pointer';
+              trParticipant.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button') || e.target.closest('i')) return;
+                openEditInscripcionModal(insc);
+              });
+              tbodyFinanciados.appendChild(trParticipant);
+            }
+
+            // 3. Agregar participante al listado general de Inscritos
+            const trInscrito = document.createElement('tr');
+            const planText = (insc.plan_pago === 'Contado' || insc.plan_pago === 'Completo') ? 'Completo' : 'Financiado';
+            trInscrito.dataset.plan = planText;
+            trInscrito.dataset.verificado = totalVerificado;
+            trInscrito.dataset.promo = insc.codigo_promocional ? '1' : '0';
+            
+            let cleanWa = '';
+            if (insc.whatsapp) {
+              cleanWa = insc.whatsapp.toString().replace(/\D/g, '');
+              if (cleanWa.startsWith('0')) {
+                cleanWa = '58' + cleanWa.substring(1);
+              } else if (!cleanWa.startsWith('58') && cleanWa.length === 10) {
+                cleanWa = '58' + cleanWa;
+              }
+            }
+            const qrMsg = `Hola! ${insc.nombre} ${insc.apellido}. Te hacemos llegar tu pase de acceso QR para TRD 2026. ¡Nos vemos pronto!`;
+            
+            trInscrito.innerHTML = `
+              <td>
+                <strong>${insc.nombre} ${insc.apellido}</strong>${getWaBtn('inscritos')}<br>
+                <span style="color:var(--text-muted); font-size:11px;">${insc.email}</span>
+              </td>
+              <td>${insc.nombre_evento.replace('Trasciende 2026 - ', '')}</td>
+              <td>
+                <strong>Iglesia:</strong> ${insc.congregacion || '-'}<br>
+                <strong>Pastor:</strong> ${insc.red_pastoral || '-'}<br>
+                <strong>Servicio:</strong> ${insc.funcion_congregacion || '-'}
+              </td>
+              <td>${planText}</td>
+              <td>
+                <span class="badge ${totalVerificado >= (insc.codigo_promocional ? 20 : 30) ? 'verificado' : 'pendiente'}" style="font-size: 11px; padding: 4px 8px;">
+                  $${totalVerificado.toFixed(0)} / $${(insc.codigo_promocional ? 20 : 30)}
+                </span>
+              </td>
+              <td>
+                ${cleanWa ? `<button class="action-btn qr-trigger" style="background: #10b981; color: white; margin-left: 4px; display: inline-flex; align-items: center; gap: 4px; font-weight: bold; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer;" onclick="event.stopPropagation(); sendWhatsAppWithQr('${insc.nombre.replace(/'/g, "\\'")}', '${insc.apellido.replace(/'/g, "\\'")}', '${insc.email.replace(/'/g, "\\'")}', '${cleanWa}', '${encodeURIComponent(qrMsg)}')"><i class="fa-solid fa-qrcode"></i> ENVIAR QR</button>` : ''}
+              </td>
+            `;
+            trInscrito.style.cursor = 'pointer';
+            trInscrito.addEventListener('click', (e) => {
+              if (e.target.closest('a') || e.target.closest('button') || e.target.closest('i')) return;
+              openEditInscripcionModal(insc);
+            });
+            tbodyInscritos.appendChild(trInscrito);
+          });
+
+          if (tbodyValidar.children.length === 0) {
+            tbodyValidar.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No hay pagos registrados</td></tr>';
+          }
+          if (tbodyInscritos.children.length === 0) {
+            tbodyInscritos.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No hay participantes registrados</td></tr>';
+          }
+          if (tbodyFinanciados.children.length === 0) {
+            tbodyFinanciados.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No hay participantes con saldo pendiente</td></tr>';
+          }
+          if (tbodyPagado.children.length === 0) {
+            tbodyPagado.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No hay participantes con inscripción 100% pagada</td></tr>';
+          }
+
+          filterTable('table-validar');
+          updateSubFilterOptions();
+          filterTable('table-inscritos');
+          filterTable('table-financiados');
+          filterTable('table-pagado');
+        } catch (e) {
+          showToast('Error al cargar inscripciones', 'error');
+          console.error(e);
+        }
+      }
+
+      // Verificar Pago
+      window.verificarPago = async (pago_id, estado) => {
+        try {
+          const res = await fetch('api/admin.php?action=verificar_pago', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pago_id, estado })
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error);
+
+          showToast(result.message);
+          loadInscripciones();
+        } catch (error) {
+          showToast(error.message, 'error');
+        }
+      };
+
+      // Cargar Usuarios
+      let allUsers = [];
+
+      async function loadUsuarios() {
+        try {
+          const res = await fetch('../api/usuarios.php');
+          if (!res.ok) throw new Error('Error al cargar usuarios');
+          allUsers = await res.json();
+          renderUsuarios(allUsers);
+        } catch (err) {
+          console.error(err);
+          showToast('Error al cargar usuarios', 'error');
+        }
+      }
+
+      function renderUsuarios(list) {
+        const tbody = document.querySelector('#table-usuarios tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        // ONLY list users with 'admin' role
+        const admins = list.filter(u => u.rol === 'admin');
+
+        admins.forEach(user => {
+          const tr = document.createElement('tr');
+          
+          tr.innerHTML = `
+            <td><strong>${user.nombre} ${user.apellido}</strong></td>
+            <td>${user.email || ''}</td>
+            <td>
+              <button onclick="updateUserRole(${user.id}, 'alumno')" class="action-btn reject" style="padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                Quitar Admin
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      window.searchUsersToPromote = () => {
+        const q = document.getElementById('search-usuarios').value.toLowerCase().trim();
+        const resultsDiv = document.getElementById('usuarios-search-results');
+        if (!resultsDiv) return;
+
+        if (q === '') {
+          resultsDiv.style.display = 'none';
+          resultsDiv.innerHTML = '';
+          return;
+        }
+
+        // Filter users matching search query who are NOT already admins
+        const matches = allUsers.filter(user => {
+          if (user.rol === 'admin') return false;
+          const name = `${user.nombre} ${user.apellido}`.toLowerCase();
+          const email = (user.email || '').toLowerCase();
+          return name.includes(q) || email.includes(q);
+        });
+
+        if (matches.length === 0) {
+          resultsDiv.innerHTML = '<div style="padding: 10px; font-size: 12px; color: #4b5563; text-align: center; background: #ffffff;">No se encontraron usuarios</div>';
+          resultsDiv.style.display = 'block';
+          return;
+        }
+
+        resultsDiv.innerHTML = matches.slice(0, 5).map(user => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #ffffff;">
+            <div style="text-align: left;">
+              <div style="font-size: 12px; font-weight: bold; color: #1f2937;">${user.nombre} ${user.apellido}</div>
+              <div style="font-size: 10px; color: #4b5563;">${user.email || ''}</div>
+            </div>
+            <button onclick="updateUserRole(${user.id}, 'admin')" class="action-btn approve" style="padding: 6px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer;">
+              + Hacer Admin
+            </button>
+          </div>
+        `).join('');
+        resultsDiv.style.display = 'block';
+      };
+
+      window.updateUserRole = async (userId, newRole) => {
+        const actionLabel = newRole === 'admin' ? 'Hacer Administrador' : 'Quitar permisos de Administrador';
+        if (!confirm(`¿Estás seguro de realizar esta acción: ${actionLabel}?`)) {
+          return;
+        }
+
+        try {
+          const res = await fetch(`../api/usuarios.php?id=${userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: userId, rol: newRole })
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Error al actualizar rol');
+          showToast('Rol de usuario actualizado con éxito', 'success');
+          
+          // Reset search bar and results dropdown
+          document.getElementById('search-usuarios').value = '';
+          const resultsDiv = document.getElementById('usuarios-search-results');
+          if (resultsDiv) {
+            resultsDiv.style.display = 'none';
+            resultsDiv.innerHTML = '';
+          }
+          
+          loadUsuarios();
+        } catch (err) {
+          showToast(err.message, 'error');
+          loadUsuarios();
+        }
+      };
+
+      document.addEventListener('click', (e) => {
+        const resultsDiv = document.getElementById('usuarios-search-results');
+        const searchInput = document.getElementById('search-usuarios');
+        if (resultsDiv && e.target !== searchInput && !resultsDiv.contains(e.target)) {
+          resultsDiv.style.display = 'none';
+        }
+      });
+
+      // Cargar Cupones
+      async function loadCupones() {
+        try {
+          const res = await fetch('api/admin.php?action=get_cupones');
+          const data = await res.json();
+          const tbody = document.querySelector('#table-cupones tbody');
+          tbody.innerHTML = '';
+
+          data.forEach(c => {
+            const expDate = new Date(c.fecha_expiracion);
+            const expired = expDate < new Date();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="font-family:'JetBrains Mono', monospace; font-weight:bold; color:var(--accent-gold);">${c.codigo}</td>
+              <td>$${c.monto_descuento}</td>
+              <td>${c.fecha_expiracion}</td>
+              <td>
+                <span class="badge ${c.usado > 0 ? 'rechazado' : 'verificado'}">
+                  ${c.usado > 0 ? 'USADO' : 'DISPONIBLE'}
+                </span>
+              </td>
+              <td>
+                <span class="badge ${expired ? 'rechazado' : 'verificado'}">
+                  ${expired ? 'EXPIRADO' : 'ACTIVO'}
+                </span>
+              </td>
+              <td>
+                <button class="action-btn approve download-btn" title="Descargar PNG del Cupón"><i class="fa-solid fa-download"></i> Descargar</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+            const dBtn = tr.querySelector('.download-btn');
+            if (dBtn) {
+              dBtn.addEventListener('click', () => {
+                downloadCouponImage(c.codigo, c.monto_descuento, c.fecha_expiracion);
+              });
+            }
+          });
+        } catch (e) {
+          showToast('Error al cargar cupones', 'error');
+        }
+      }
+
+      // Generar Lote de Cupones
+      cuponForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const cantidad = parseInt(document.getElementById('cupon-cantidad').value) || 1;
+        const monto_descuento = document.getElementById('cupon-descuento').value;
+        const fecha_expiracion = document.getElementById('cupon-expiracion').value;
+
+        const submitBtn = cuponForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> GENERANDO...';
+
+        let creados = 0;
+        let errores = 0;
+        const codigosUsados = new Set();
+
+        for (let i = 0; i < cantidad; i++) {
+          // Generar código único localmente (sin duplicar dentro del lote)
+          let codigo = '';
+          let intentos = 0;
+          do {
+            codigo = generateBiblicalCode();
+            intentos++;
+          } while (codigosUsados.has(codigo) && intentos < 50);
+          codigosUsados.add(codigo);
+
+          try {
+            const res = await fetch('api/admin.php?action=generar_cupon_lote', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ codigo, monto_descuento, fecha_expiracion })
+            });
+            const result = await res.json();
+
+            if (!res.ok) {
+              // Si ya existe en BD, intentar con otro código
+              if (result.error && result.error.includes('ya existe')) {
+                i--; // reintentar este índice
+              } else {
+                errores++;
+              }
+              continue;
+            }
+
+            creados++;
+            downloadCouponImage(codigo, monto_descuento, fecha_expiracion);
+            // Pequeña pausa para no saturar el navegador con descargas
+            await new Promise(r => setTimeout(r, 400));
+          } catch (err) {
+            errores++;
+          }
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-layer-group"></i> GENERAR LOTE';
+
+        if (creados > 0) showToast(`${creados} cupón(es) generado(s) correctamente.`);
+        if (errores > 0) showToast(`${errores} cupón(es) no pudieron crearse.`, 'error');
+
+        cuponForm.reset();
+        document.getElementById('cupon-cantidad').value = 10;
+        loadCupones();
+      });
+
+      window.downloadCouponImage = (codigo, monto, fecha) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 900; // 300 * 3 (Alta resolución)
+        canvas.height = 1200; // 400 * 3
+        const ctx = canvas.getContext('2d');
+        ctx.scale(3, 3); // Escalar todas las operaciones por 3 para mantener coordenadas de 300x400
+
+        // Load branding images
+        const imgTrd = new Image();
+        const imgLns = new Image();
+        let loaded = 0;
+
+        const onLoaded = () => {
+          loaded++;
+          if (loaded === 2) {
+            draw();
+          }
+        };
+
+        imgTrd.onload = onLoaded;
+        imgLns.onload = onLoaded;
+        imgTrd.onerror = onLoaded;
+        imgLns.onerror = onLoaded;
+
+        // Src paths
+        imgTrd.src = '../assets/img/trd2026.png';
+        imgLns.src = '../assets/img/lns_long.png';
+
+        // Timeout fallback
+        const timeout = setTimeout(() => {
+          draw();
+        }, 600);
+
+        function draw() {
+          clearTimeout(timeout);
+
+          // Clear canvas (ensures transparent corners)
+          ctx.clearRect(0, 0, 300, 400);
+
+          // Clip canvas with rounded corners path (radius = 16)
+          ctx.beginPath();
+          ctx.moveTo(16, 0);
+          ctx.lineTo(284, 0);
+          ctx.quadraticCurveTo(300, 0, 300, 16);
+          ctx.lineTo(300, 384);
+          ctx.quadraticCurveTo(300, 400, 284, 400);
+          ctx.lineTo(16, 400);
+          ctx.quadraticCurveTo(0, 400, 0, 384);
+          ctx.lineTo(0, 16);
+          ctx.quadraticCurveTo(0, 0, 16, 0);
+          ctx.closePath();
+          ctx.clip();
+
+          // 1. Fondo azul TRD oficial sólido
+          ctx.fillStyle = '#2d3e85';
+          ctx.fillRect(0, 0, 300, 400);
+
+          // 3. Dibujar logos
+          if (imgTrd.complete && imgTrd.naturalWidth) {
+            const aspect = imgTrd.naturalWidth / imgTrd.naturalHeight;
+            const h = 30;
+            const w = h * aspect;
+            ctx.drawImage(imgTrd, 150 - w / 2, 12, w, h);
+          } else {
+            ctx.fillStyle = '#c3ccf3';
+            ctx.font = '700 12px Plus Jakarta Sans, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('TRASCIENDE 2026', 150, 36);
+          }
+
+          if (imgLns.complete && imgLns.naturalWidth) {
+            const aspect = imgLns.naturalWidth / imgLns.naturalHeight;
+            const h = 30;
+            const w = h * aspect;
+            ctx.drawImage(imgLns, 150 - w / 2, 48, w, h);
+          } else {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '700 11px Plus Jakarta Sans, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('LUMINARES', 150, 68);
+          }
+
+          // Línea divisoria superior
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(30, 95);
+          ctx.lineTo(270, 95);
+          ctx.stroke();
+
+          // 4. Detalle Descuento
+          ctx.fillStyle = '#A0A0B0';
+          ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('CUPÓN DE DESCUENTO', 150, 125);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '800 32px Plus Jakarta Sans, sans-serif';
+          ctx.fillText(`$${parseFloat(monto).toFixed(0)} USD`, 150, 165);
+
+          // 5. Caja del código (Bordes redondeados - radio 8px)
+          ctx.fillStyle = 'rgba(195, 204, 243, 0.08)';
+          ctx.strokeStyle = '#c3ccf3';
+          ctx.lineWidth = 1.5;
+          
+          const rx = 40, ry = 195, rw = 220, rh = 50, rr = 8;
+          ctx.beginPath();
+          ctx.moveTo(rx + rr, ry);
+          ctx.lineTo(rx + rw - rr, ry);
+          ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + rr);
+          ctx.lineTo(rx + rw, ry + rh - rr);
+          ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - rr, ry + rh);
+          ctx.lineTo(rx + rr, ry + rh);
+          ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - rr);
+          ctx.lineTo(rx, ry + rr);
+          ctx.quadraticCurveTo(rx, ry, rx + rr, ry);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '700 20px JetBrains Mono, monospace';
+          ctx.fillText(codigo.toUpperCase(), 150, 228);
+
+          // Línea de corte (Tear-off line)
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(0, 280);
+          ctx.lineTo(300, 280);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Círculos de corte en los lados transparentes (usando destination-out)
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath();
+          ctx.arc(0, 280, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(300, 280, 10, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalCompositeOperation = 'source-over'; // Restaurar modo normal
+
+          // 6. Expiración
+          ctx.fillStyle = '#A0A0B0';
+          ctx.font = '600 10px Plus Jakarta Sans, sans-serif';
+          ctx.fillText('VÁLIDO HASTA', 150, 315);
+
+          // Formatear fecha a DD/MM/AAAA
+          let fechaFormateada = fecha;
+          try {
+            const partes = fecha.split('-');
+            if (partes.length === 3) {
+              fechaFormateada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+          } catch(e){}
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '700 12px JetBrains Mono, monospace';
+          ctx.fillText(fechaFormateada, 150, 335);
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.font = '500 8px Plus Jakarta Sans, sans-serif';
+          ctx.fillText('REFORMA© 2026', 150, 370);
+
+          // Descarga
+          const dataUrl = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = `cupon_${codigo.toLowerCase()}.png`;
+          link.href = dataUrl;
+          link.click();
+        }
+      };
+
+      // Generador de código bíblico leet speak (retorna string)
+      window.generateBiblicalCode = () => {
+        const nombres = [
+          'david', 'goliat', 'moises', 'salomon', 'noe', 'abraham', 'isaac', 'jacob', 'jose', 'daniel',
+          'sanson', 'gedeon', 'samuel', 'saul', 'elias', 'eliseo', 'isaias', 'jeremias', 'ezequiel',
+          'jonas', 'pedro', 'pablo', 'juan', 'lucas', 'mateo', 'marcos', 'tomas', 'andres', 'felipe',
+          'santiago', 'esteban', 'maria', 'marta', 'ester', 'sara', 'rebeca', 'raquel', 'debora',
+          'noemi', 'abigail', 'salome', 'eva', 'adan', 'abel', 'cain', 'rut', 'josue', 'caleb',
+          'barnabas', 'timoteo', 'silas', 'cornelio', 'lidia', 'priscila', 'aquila'
+        ];
+        const nombre = nombres[Math.floor(Math.random() * nombres.length)];
+        let code = nombre.toUpperCase()
+          .replace(/A/g, '4')
+          .replace(/I/g, '1')
+          .replace(/O/g, '0')
+          .replace(/E/g, '3')
+          .replace(/B/g, '8');
+        code += Math.floor(10 + Math.random() * 90);
+        return code;
+      };
+
+      // Actualizar opciones del filtro secundario en Inscritos
+      window.updateSubFilterOptions = () => {
+        const planSelect = document.getElementById('filter-inscritos-plan');
+        const subSelect = document.getElementById('filter-inscritos-status');
+        if (!planSelect || !subSelect) return;
+
+        const plan = planSelect.value;
+        subSelect.innerHTML = '';
+
+        if (plan === 'todos') {
+          subSelect.style.display = 'none';
+          subSelect.value = 'todos';
+        } else if (plan === 'Completo') {
+          subSelect.style.display = '';
+          subSelect.innerHTML = `
+            <option value="todos">Todos</option>
+            <option value="pagado">Pagado</option>
+            <option value="sin_pagar">Sin pagar</option>
+          `;
+          subSelect.value = 'todos';
+        } else if (plan === 'Financiado') {
+          subSelect.style.display = '';
+          subSelect.innerHTML = `
+            <option value="todos">Todos</option>
+            <option value="inscripcion">Inscripción</option>
+            <option value="ins_c1">Ins + C1</option>
+            <option value="ins_c1_c2">Ins + C1 + C2</option>
+            <option value="ins_c1_c2_c3">Ins + C1 + C2 + C3</option>
+          `;
+          subSelect.value = 'todos';
+        }
+      };
+
+      // Filtrar tablas
+      window.filterTable = (tableId) => {
+        let searchInputId = 'search-validar';
+        let statusSelectId = 'filter-validar-estado';
+        
+        if (tableId === 'table-financiados') {
+          searchInputId = 'search-financiados';
+          statusSelectId = null;
+        } else if (tableId === 'table-pagado') {
+          searchInputId = 'search-pagado';
+          statusSelectId = null;
+        } else if (tableId === 'table-inscritos') {
+          searchInputId = 'search-inscritos';
+          statusSelectId = 'filter-inscritos-plan';
+        }
+        
+        const searchInput = document.getElementById(searchInputId);
+        const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        
+        const statusSelect = statusSelectId ? document.getElementById(statusSelectId) : null;
+        const statusVal = statusSelect ? statusSelect.value : 'todos';
+        
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        let visibleCount = 0;
+        
+        // Remover fila de estado vacío temporal si existe
+        const existingEmptyRow = document.querySelector(`#${tableId} tbody tr.empty-state-row`);
+        if (existingEmptyRow) {
+          existingEmptyRow.remove();
+        }
+        
+        rows.forEach(row => {
+          if (row.classList.contains('empty-state-row')) return;
+          
+          const text = row.textContent.toLowerCase();
+          const matchesQuery = text.includes(q);
+          
+          let matchesFilter = true;
+          if (tableId === 'table-inscritos') {
+            const rowPlan = row.dataset.plan || '';
+            const totalVerificado = parseFloat(row.dataset.verificado || '0');
+            const hasPromo = row.dataset.promo === '1';
+            
+            const matchesPlan = (statusVal === 'todos' || rowPlan === statusVal);
+            let matchesSub = true;
+            
+            const subSelect = document.getElementById('filter-inscritos-status');
+            const subVal = subSelect && subSelect.style.display !== 'none' ? subSelect.value : 'todos';
+            
+            if (subVal !== 'todos') {
+              if (rowPlan === 'Completo') {
+                const limit = hasPromo ? 20.00 : 30.00;
+                if (subVal === 'pagado') {
+                  matchesSub = (totalVerificado >= limit);
+                } else if (subVal === 'sin_pagar') {
+                  matchesSub = (totalVerificado === 0);
+                }
+              } else if (rowPlan === 'Financiado') {
+                if (subVal === 'inscripcion') {
+                  matchesSub = (totalVerificado >= 6 && totalVerificado < 12);
+                } else if (subVal === 'ins_c1') {
+                  matchesSub = (totalVerificado >= 12 && totalVerificado < 18);
+                } else if (subVal === 'ins_c1_c2') {
+                  matchesSub = (totalVerificado >= 18 && totalVerificado < 24);
+                } else if (subVal === 'ins_c1_c2_c3') {
+                  matchesSub = (totalVerificado >= 24);
+                }
+              }
+            }
+            matchesFilter = matchesPlan && matchesSub;
+          } else if (statusSelectId) {
+            const rowEstado = row.dataset.estado || '';
+            matchesFilter = (statusVal === 'todos' || rowEstado === statusVal);
+          }
+          
+          if (matchesQuery && matchesFilter) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Si no quedan filas visibles, agregar fila de estado vacío
+        if (visibleCount === 0) {
+          const tbody = document.querySelector(`#${tableId} tbody`);
+          if (tbody) {
+            const tr = document.createElement('tr');
+            tr.classList.add('empty-state-row');
+            
+            let message = 'No hay registros';
+            if (tableId === 'table-validar') message = 'No hay pagos por validar con este filtro';
+            else if (tableId === 'table-inscritos') message = 'No hay participantes registrados con este filtro';
+            else if (tableId === 'table-financiados') message = 'No hay participantes financiados con este filtro';
+            else if (tableId === 'table-pagado') message = 'No hay participantes con inscripción 100% pagada';
+            
+            const colCount = document.querySelectorAll(`#${tableId} thead th`).length || 7;
+            
+            tr.innerHTML = `<td colspan="${colCount}" style="text-align:center; color:var(--text-muted); padding: 20px;">${message}</td>`;
+            tbody.appendChild(tr);
+          }
+        }
+
+        const countId = tableId.replace('table-', 'count-');
+        const countEl = document.getElementById(countId);
+        if (countEl) {
+          countEl.textContent = `${visibleCount} resultado(s)`;
+        }
+      };
+
+      // Función para exportar la tabla activa actual
+      window.exportActiveTable = () => {
+        const activePanel = document.querySelector('.admin-panel.active');
+        if (!activePanel) return;
+        const table = activePanel.querySelector('table');
+        if (!table) return;
+        const tableId = table.id;
+        
+        let filename = 'datos_exportados.csv';
+        if (tableId === 'table-validar') filename = 'pagos_reportados.csv';
+        else if (tableId === 'table-inscritos') filename = 'todos_los_inscritos.csv';
+        else if (tableId === 'table-financiados') filename = 'participantes_financiados.csv';
+        else if (tableId === 'table-pagado') filename = 'participantes_pagados.csv';
+        
+        window.exportTableToCSV(tableId, filename);
+      };
+
+      // Exportar tabla a archivo CSV (UTF-8 con BOM)
+      window.exportTableToCSV = (tableId, filename) => {
+        const csv = [];
+        const rows = document.querySelectorAll(`#${tableId} tr`);
+
+        rows.forEach(row => {
+          if (row.style.display === 'none') return;
+          const rowData = [];
+          const cols = row.querySelectorAll('td, th');
+
+          cols.forEach(col => {
+            let text = col.innerText.replace(/"/g, '""').trim();
+            // remove action buttons text from export
+            text = text.replace(/Aprobar\s*Rechazar/g, '');
+            rowData.push(`"${text}"`);
+          });
+          if (rowData.length > 0) {
+            csv.push(rowData.join(','));
+          }
+        });
+
+        const csvFile = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const downloadLink = document.createElement('a');
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+
+      // Abrir Visor de Imagen
+      window.openImageViewer = (src) => {
+        const viewer = document.getElementById('imageViewer');
+        const img = document.getElementById('viewerImg');
+        img.src = src;
+        viewer.style.display = 'flex';
+      };
+
+      window.closeImageViewer = () => {
+        document.getElementById('imageViewer').style.display = 'none';
+      };
+
+      // Modal Editar
+      window.openEditInscripcionModal = (insc) => {
+        document.getElementById('edit-insc-id').value = insc.inscripcion_id;
+        document.getElementById('edit-persona-id').value = insc.persona_id;
+        document.getElementById('edit-usuario-id').value = insc.usuario_id;
+        document.getElementById('edit-nombre').value = insc.nombre || '';
+        document.getElementById('edit-apellido').value = insc.apellido || '';
+        document.getElementById('edit-cedula').value = insc.cedula || '';
+        document.getElementById('edit-whatsapp').value = insc.whatsapp || '';
+        document.getElementById('edit-email').value = insc.email || '';
+        document.getElementById('edit-congregacion').value = insc.congregacion || '';
+        document.getElementById('edit-red-pastoral').value = insc.red_pastoral || '';
+        document.getElementById('edit-funcion').value = insc.funcion_congregacion || '';
+        const planVal = (insc.plan_pago || '').trim().toLowerCase();
+        document.getElementById('edit-plan-pago').value = (planVal === 'contado' || planVal === 'completo') ? 'Completo' : 'Financiado';
+        document.getElementById('edit-monto-abonado').value = insc.monto_abonado || 0;
+        
+        document.getElementById('editInscripcionModal').style.display = 'flex';
+      };
+
+       window.openEditPagoModal = (pago) => {
+        document.getElementById('edit-pago-id').value = pago.pago_id;
+        document.getElementById('edit-pago-concepto').value = pago.tipo_pago || 'Pago';
+        document.getElementById('edit-pago-monto').value = pago.monto || '';
+        document.getElementById('edit-pago-metodo').value = pago.metodo_pago || '';
+        document.getElementById('edit-pago-referencia').value = pago.referencia || '';
+        
+        document.getElementById('editPagoModal').style.display = 'flex';
+      };
+
+      window.closeEditPagoModal = () => {
+        document.getElementById('editPagoModal').style.display = 'none';
+      };
+
+      window.savePagoEdit = async (e) => {
+        e.preventDefault();
+        const payload = {
+          pago_id: parseInt(document.getElementById('edit-pago-id').value),
+          tipo_pago: document.getElementById('edit-pago-concepto').value.trim(),
+          monto: parseFloat(document.getElementById('edit-pago-monto').value),
+          metodo_pago: document.getElementById('edit-pago-metodo').value.trim(),
+          referencia: document.getElementById('edit-pago-referencia').value.trim()
+        };
+
+        try {
+          const res = await fetch('api/admin.php?action=editar_pago', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Error al editar el pago');
+          showToast(result.message || 'Pago editado con éxito');
+          closeEditPagoModal();
+          loadInscripciones();
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      };
+
+      window.openQrModal = (email, nombre, apellido) => {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(email)}`;
+        document.getElementById('qr-modal-name').textContent = `${nombre.toUpperCase()} ${apellido.toUpperCase()}`;
+        document.getElementById('qr-modal-email').textContent = email.toLowerCase();
+        document.getElementById('qr-modal-img').src = qrUrl;
+        
+        // Configurar botón para descargar el ticket completo
+        const downloadBtn = document.getElementById('qr-modal-download');
+        downloadBtn.onclick = (e) => {
+          e.preventDefault();
+          window.downloadQrTicket(nombre, apellido, email);
+        };
+
+        document.getElementById('qrModal').style.display = 'flex';
+      };
+
+      window.closeQrModal = () => {
+        document.getElementById('qrModal').style.display = 'none';
+        document.getElementById('qr-modal-img').src = '';
+      };
+
+      window.sendWhatsAppWithQr = async (nombre, apellido, email, phone, msg) => {
+        try {
+          showToast('Generando y subiendo pase QR al servidor...');
+          const paseUrl = await window.generateAndUploadQrTicket(nombre, apellido, email);
+          const baseMsg = decodeURIComponent(msg);
+          const fullMsg = `${baseMsg}\n\nTu pase de acceso digital: ${paseUrl}`;
+          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(fullMsg)}`, '_blank');
+        } catch (err) {
+          showToast('Error al procesar el pase QR: ' + err.message, 'error');
+        }
+      };
+
+      window.closeEditInscripcionModal = () => {
+        document.getElementById('editInscripcionModal').style.display = 'none';
+      };
+
+      window.deleteInscripcionFromModal = async () => {
+        const inscId = parseInt(document.getElementById('edit-insc-id').value);
+        if (!inscId) return;
+
+        if (!confirm('¿Estás seguro de que deseas eliminar permanentemente este registro de inscripción? Esta acción no se puede deshacer.')) {
+          return;
+        }
+
+        try {
+          const res = await fetch('api/admin.php?action=eliminar_inscripcion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ inscripcion_id: inscId })
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Error al eliminar la inscripción');
+          alert(result.message);
+          closeEditInscripcionModal();
+          loadInscripciones();
+        } catch (err) {
+          alert(err.message);
+        }
+      };
+
+      window.saveInscripcionEdit = async (e) => {
+        e.preventDefault();
+        const payload = {
+          inscripcion_id: parseInt(document.getElementById('edit-insc-id').value),
+          persona_id: parseInt(document.getElementById('edit-persona-id').value),
+          usuario_id: parseInt(document.getElementById('edit-usuario-id').value),
+          nombre: document.getElementById('edit-nombre').value.trim(),
+          apellido: document.getElementById('edit-apellido').value.trim(),
+          cedula: document.getElementById('edit-cedula').value.trim(),
+          whatsapp: document.getElementById('edit-whatsapp').value.trim(),
+          email: document.getElementById('edit-email').value.trim(),
+          congregacion: document.getElementById('edit-congregacion').value.trim(),
+          red_pastoral: document.getElementById('edit-red-pastoral').value.trim(),
+          funcion_congregacion: document.getElementById('edit-funcion').value.trim(),
+          plan_pago: document.getElementById('edit-plan-pago').value,
+          monto_abonado: parseFloat(document.getElementById('edit-monto-abonado').value || 0)
+        };
+
+        try {
+          const res = await fetch('api/admin.php?action=editar_inscripcion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Error al guardar cambios');
+          alert(result.message);
+          closeEditInscripcionModal();
+          loadInscripciones();
+        } catch (err) {
+          alert(err.message);
+        }
+      };
+
+      // Inicializar
+      checkSession();
+    });
+  </script>
+
+  <!-- Modal Editar Inscripción -->
+  <div id="editInscripcionModal" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); padding: 0; border-radius: 16px; width: 90%; max-width: 480px; position: relative; overflow: hidden; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);">
+      <div style="background: #fbfbfc; padding: 16px 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <h3 style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); letter-spacing: 0.5px;">Editar Participante</h3>
+          <button type="button" onclick="deleteInscripcionFromModal()" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; padding: 4px; transition: opacity 0.2s;" title="Eliminar Participante"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+        <button onclick="closeEditInscripcionModal()" style="background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <div style="padding: 20px; max-height: 75vh; overflow-y: auto;">
+        <form id="edit-inscripcion-form" onsubmit="saveInscripcionEdit(event)" style="display: grid; gap: 14px;">
+          <input type="hidden" id="edit-insc-id">
+          <input type="hidden" id="edit-persona-id">
+          <input type="hidden" id="edit-usuario-id">
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Nombre</label>
+              <input type="text" id="edit-nombre" required class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Apellido</label>
+              <input type="text" id="edit-apellido" required class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Cédula</label>
+              <input type="text" id="edit-cedula" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">WhatsApp</label>
+              <input type="text" id="edit-whatsapp" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0; text-align: left;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Email</label>
+            <input type="email" id="edit-email" required class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Iglesia / Congregación</label>
+              <input type="text" id="edit-congregacion" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Pastor / Red Pastoral</label>
+              <input type="text" id="edit-red-pastoral" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0; text-align: left;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Función o Ministerio</label>
+            <input type="text" id="edit-funcion" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Plan de Pago</label>
+              <select id="edit-plan-pago" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit; cursor: pointer; height: 40px;">
+                <option value="Completo">Pago Completo</option>
+                <option value="Financiado">Plan Financiado</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0; text-align: left;">
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Monto Abonado ($)</label>
+              <input type="number" id="edit-monto-abonado" step="0.01" min="0" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            </div>
+          </div>
+
+          <div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" onclick="closeEditInscripcionModal()" style="background: #f4f4f5; border: none; color: var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.2s;">Cancelar</button>
+            <button type="submit" style="background: var(--accent-gold); border: none; color: #ffffff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Pago -->
+  <div id="editPagoModal" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); padding: 0; border-radius: 16px; width: 90%; max-width: 400px; position: relative; overflow: hidden; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);">
+      <div style="background: #fbfbfc; padding: 16px 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); letter-spacing: 0.5px;">Editar Pago</h3>
+        <button onclick="closeEditPagoModal()" style="background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <div style="padding: 20px;">
+        <form id="edit-pago-form" onsubmit="savePagoEdit(event)" style="display: grid; gap: 14px;">
+          <input type="hidden" id="edit-pago-id">
+          
+          <div class="form-group" style="margin-bottom:0; text-align: left;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Concepto / Tipo de Pago</label>
+            <input type="text" id="edit-pago-concepto" required class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+          </div>
+          
+          <div class="form-group" style="margin-bottom:0; text-align: left;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Monto ($)</label>
+            <input type="number" id="edit-pago-monto" step="0.01" min="0.01" required class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+          </div>
+
+          <div class="form-group" style="margin-bottom:0; text-align: left;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Método de Pago</label>
+            <input type="text" id="edit-pago-metodo" required class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+          </div>
+
+          <div class="form-group" style="margin-bottom:0; text-align: left;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Referencia</label>
+            <input type="text" id="edit-pago-referencia" class="form-control" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.12); color: var(--text-main); border-radius: 8px; padding: 10px 12px; width: 100%; box-sizing: border-box; font-family: inherit;">
+          </div>
+
+          <div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" onclick="closeEditPagoModal()" style="background: #f4f4f5; border: none; color: var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.2s;">Cancelar</button>
+            <button type="submit" style="background: var(--accent-gold); border: none; color: #ffffff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s;">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ver QR -->
+  <div id="qrModal" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+    <div style="background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); padding: 0; border-radius: 16px; width: 90%; max-width: 380px; position: relative; overflow: hidden; color: var(--text-main); font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15); text-align: center;">
+      <div style="background: #fbfbfc; padding: 16px 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; color: var(--accent-gold); letter-spacing: 0.5px;">Acceso QR</h3>
+        <button onclick="closeQrModal()" style="background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <div style="padding: 25px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+        <h4 id="qr-modal-name" style="margin: 0; font-size: 16px; font-weight: 800; color: #1f2937;"></h4>
+        <p id="qr-modal-email" style="margin: 0; font-size: 12px; color: #6b7280; font-family: 'JetBrains Mono', monospace;"></p>
+        
+        <div style="background: #ffffff; padding: 12px; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: inline-block; margin: 10px 0;">
+          <img id="qr-modal-img" src="" alt="QR Acceso" style="display: block; width: 200px; height: 200px;">
+        </div>
+
+        <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 10px;">
+          <button type="button" onclick="closeQrModal()" style="background: #f4f4f5; border: none; color: var(--text-muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.2s;">Cerrar</button>
+          <button id="qr-modal-download" style="background: var(--accent-gold); border: none; color: #ffffff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-download"></i> Descargar Pase
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visor de Capture -->
+  <div id="imageViewer" class="image-viewer-overlay" onclick="closeImageViewer()" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100001; backdrop-filter: blur(8px);">
+    <span class="close-viewer" style="position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer;">&times;</span>
+    <img id="viewerImg" src="" alt="Comprobante" onclick="event.stopPropagation()" style="max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  </div>
+</body>
+
+</html>

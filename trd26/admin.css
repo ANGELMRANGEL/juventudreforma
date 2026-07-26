@@ -1,0 +1,243 @@
+/* admin.css - TRD 2026 ADMIN PANEL */
+
+:root {
+  --bg-color: #2d3e85;
+  --card-bg: #ffffff;
+  --text-main: #ffffff;
+  --text-muted: #c3ccf3;
+  --accent-gold: #c3ccf3;
+  --accent-gold-glow: rgba(195, 204, 243, 0.25);
+  --accent-neon: #c3ccf3;
+  --accent-neon-glow: rgba(195, 204, 243, 0.2);
+  --border-color: rgba(255, 255, 255, 0.15);
+  --border-focus: rgba(195, 204, 243, 0.6);
+  --error: #ef4444;
+  --success: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+  font-size: 13px;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Explicitly apply text variables to elements to resolve CSS inheritance issues */
+th, td, strong, p, h1, h2, h3, label {
+  color: var(--text-main);
+}
+
+/* High-contrast styling for search, filter, and coupon generation inputs outside cards */
+input[type="text"]:not(.form-control),
+input[type="number"]:not(.form-control),
+input[type="date"]:not(.form-control),
+#search-validar {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+input:not(.form-control)::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Dropdown select filters style (light blue background with dark blue text) */
+select:not(.form-control) {
+  background: #c3ccf3 !important;
+  border: 1px solid #c3ccf3 !important;
+  color: #2d3e85 !important;
+  font-weight: bold !important;
+}
+
+select:not(.form-control) option {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  font-weight: normal !important;
+}
+
+/* Glowing Background Orbs */
+.glowing-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.25;
+}
+
+.glow-orb-1 {
+  top: -10%;
+  left: 20%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, #2d3e85 0%, transparent 70%);
+}
+
+.glow-orb-2 {
+  bottom: 10%;
+  right: 10%;
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, #2d3e85 0%, transparent 70%);
+}
+
+.badge-luminares {
+  font-family: 'JetBrains Mono', monospace;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Overrides inside white panels/tables of admin view */
+.table-container,
+.registration-card,
+.card-header,
+table {
+  --text-main: #1f2937 !important;
+  --text-muted: #4b5563 !important;
+  --border-color: rgba(0, 0, 0, 0.08) !important;
+  --accent-gold: #2d3e85 !important;
+  --accent-neon: #2d3e85 !important;
+}
+
+/* Button class used in login card */
+.submit-btn {
+  background: #2d3e85;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(45, 62, 133, 0.15);
+}
+
+.submit-btn span,
+.submit-btn i {
+  color: #ffffff !important;
+  background: transparent !important;
+  display: inline !important;
+  padding: 0 !important;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(45, 62, 133, 0.25);
+  opacity: 0.95;
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/* Toast styling for admin */
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  background: #ffffff;
+  color: #1f2937;
+  border-left: 4px solid var(--accent-gold);
+  border-radius: 6px;
+  padding: 16px 20px;
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.success {
+  border-left-color: #10b981 !important;
+}
+
+.toast.error {
+  border-left-color: #ef4444 !important;
+}
+
+/* Footer for admin */
+.main-footer {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1px;
+  padding: 25px 0 0px 0;
+  margin-top: auto;
+}
+
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 98vh; /* Adjusted slightly to account for body offsets/margins */
+}
+
+/* Fix CSS variable inheritance inside the admin edit modal overlay */
+.modal-overlay {
+  --text-main: #1f2937 !important;
+  --text-muted: #4b5563 !important;
+  --border-color: rgba(0, 0, 0, 0.12) !important;
+  --accent-gold: #2d3e85 !important;
+  --accent-neon: #2d3e85 !important;
+}
+
+.modal-overlay button {
+  font-family: inherit;
+}
+
+

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luminares TRD 2026 - Inscripción</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css?v=3.5">
+</head>
+
+<body>
+  <div id="toast-container"></div>
+
+  <!-- Glowing Background Effect -->
+  <div class="glowing-bg" aria-hidden="true">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <div class="container">
+    <header class="event-header">
+      <div class="logo-area">
+        <img src="../assets/img/trd2026.png" alt="TRD 2026" style="max-height: 30px; width: auto; display: block; margin: 0 auto 10px auto;">
+      </div>
+      <img src="../assets/img/lns_long.png" alt="Luminares" class="main-logo">
+    </header>
+
+    <main class="registration-card">
+      <!-- PROGRESS INDICATOR -->
+      <div class="step-progress-container">
+        <div class="progress-bar">
+          <div class="progress-line" id="progress-line"></div>
+        </div>
+        <div class="step-dots">
+          <div class="step-dot active" data-step="1"><span>1</span></div>
+          <div class="step-dot" data-step="2"><span>2</span></div>
+          <div class="step-dot" data-step="3"><span>3</span></div>
+          <div class="step-dot" data-step="4"><span>4</span></div>
+          <div class="step-dot" data-step="5"><span>5</span></div>
+        </div>
+      </div>
+
+      <!-- REGISTRATION FORM -->
+      <form id="registro-form" novalidate>
+        <!-- PASO 1: SELECCIONAR SEDE -->
+        <div class="form-step active" data-step="1">
+          <div class="step-header">
+            <p>Elige la sede de tu preferencia para asistir al evento.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 20px;">
+            <label class="plan-option">
+              <input type="radio" name="evento_id" value="1" checked>
+              <div class="option-content">
+                <span class="plan-title">MARACAY</span>
+                <p
+                  style="margin: 4px 0 2px 0; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-main);">
+                  16 - 17 OCT</p>
+                <p style="margin: 0; font-size: 11px; color: var(--text-muted);">Sede La Fuente</p>
+              </div>
+            </label>
+
+            <label class="plan-option">
+              <input type="radio" name="evento_id" value="2">
+              <div class="option-content">
+                <span class="plan-title">TINAQUILLO</span>
+                <p
+                  style="margin: 4px 0 2px 0; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-main);">
+                  30 - 31 OCT</p>
+                <p style="margin: 0; font-size: 11px; color: var(--text-muted);">Sede Cojedes</p>
+              </div>
+            </label>
+
+            <label class="plan-option">
+              <input type="radio" name="evento_id" value="3">
+              <div class="option-content">
+                <span class="plan-title">EL TIGRE</span>
+                <p
+                  style="margin: 4px 0 2px 0; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-main);">
+                  13 - 16 NOV</p>
+                <p style="margin: 0; font-size: 11px; color: var(--text-muted);">Sede Visión Profética</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- PASO 2: DATOS PERSONALES -->
+        <div class="form-step" data-step="2">
+          <div class="step-header">
+            <p>Ingresa tus datos de contacto.</p>
+          </div>
+
+          <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+            <div>
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" required placeholder="Ej. Juan">
+            </div>
+            <div>
+              <label for="apellido">Apellido</label>
+              <input type="text" id="apellido" required placeholder="Ej. Pérez">
+            </div>
+            <div style="grid-column: span 2;">
+              <label for="cedula">Cédula de Identidad</label>
+              <input type="text" id="cedula" required placeholder="25123456">
+            </div>
+            <div style="grid-column: span 2;">
+              <label for="email">Correo Electrónico</label>
+              <input type="email" id="email" required placeholder="correo@ejemplo.com" readonly>
+            </div>
+            <div style="grid-column: span 2;">
+              <label for="whatsapp">WhatsApp / Teléfono</label>
+              <input type="tel" id="whatsapp" required placeholder="04123456789">
+            </div>
+            <div>
+              <label for="edad">Edad</label>
+              <input type="number" id="edad" required placeholder="Ej. 25" min="1" max="120">
+            </div>
+            <div>
+              <label for="sexo">Sexo</label>
+              <select id="sexo" required>
+                <option value="" disabled selected>Selecciona</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 3: CONGREGACIÓN Y RED -->
+        <div class="form-step" data-step="3">
+          <div class="step-header">
+            <p>Cuéntanos un poco sobre tu congregación</p>
+          </div>
+
+          <div class="form-grid" style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px;">
+            <div style="position: relative;">
+              <label for="congregacion">Nombre de tu Iglesia / Congregación</label>
+              <input type="text" id="congregacion" required placeholder="Escribe el nombre de tu iglesia...">
+              <div id="autocomplete-list" class="autocomplete-items"></div>
+            </div>
+
+            <div>
+              <label for="red_pastoral_select">Pastor o Red de Servicio</label>
+              <select id="red_pastoral_select" required>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Apóstoles Munno">Apóstoles Munno</option>
+                <option value="Apostol Rivas">Apostol Rivas</option>
+                <option value="Pastora Aidez Fernández">Pastora Aidez Fernández</option>
+                <option value="Pastores Alvarez">Pastores Alvarez</option>
+                <option value="Pastores Andrade">Pastores Andrade</option>
+                <option value="Pastores Ayala">Pastores Ayala</option>
+                <option value="Pastores Bejarano">Pastores Bejarano</option>
+                <option value="Pastores Belloso">Pastores Belloso</option>
+                <option value="Pastores Bernal">Pastores Bernal</option>
+                <option value="Pastores Chacón">Pastores Chacón</option>
+                <option value="Pastores De Sousa">Pastores De Sousa</option>
+                <option value="Pastores Duarte">Pastores Duarte</option>
+                <option value="Pastores Espinoza">Pastores Espinoza</option>
+                <option value="Pastores González">Pastores González</option>
+                <option value="Pastores Guerrero">Pastores Guerrero</option>
+                <option value="Pastores Hermoso">Pastores Hermoso</option>
+                <option value="Pastores Ibarra">Pastores Ibarra</option>
+                <option value="Pastores Matus">Pastores Matus</option>
+                <option value="Pastores Obispo">Pastores Obispo</option>
+                <option value="Pastores Padrón">Pastores Padrón</option>
+                <option value="Pastores Rodríguez">Pastores Rodríguez</option>
+                <option value="Pastores Ruíz">Pastores Ruíz</option>
+                <option value="Pastores Silvera">Pastores Silvera</option>
+                <option value="Otra Red">Otra Red</option>
+                <option value="Sin red">Sin red</option>
+              </select>
+            </div>
+
+            <div id="otro-pastor-container" class="hidden">
+              <label for="red_pastoral">Especifica el Pastor / Red</label>
+              <input type="text" id="red_pastoral" placeholder="Nombre del pastor/red">
+            </div>
+
+            <div>
+              <label for="funcion_congregacion">Función en tu Iglesia / Ministerio</label>
+              <select id="funcion_congregacion" required>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Pastor">Pastor</option>
+                <option value="Líder">Líder</option>
+                <option value="Mentor">Mentor</option>
+                <option value="Pata Sólida">Pata Sólida</option>
+                <option value="Pata Formación">Pata Formación</option>
+                <option value="Salmista">Salmista</option>
+                <option value="Servidor">Servidor</option>
+                <option value="Discipulo">Discipulo</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="ciudad">Ciudad de Residencia</label>
+              <input type="text" id="ciudad" required placeholder="Ej. Maracay">
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 4: MODALIDAD DE PAGO -->
+        <div class="form-step" data-step="4">
+          <div class="step-header">
+            <p>Elige el plan de tu preferencia para asegurar tu cupo.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 20px;">
+            <label class="plan-option">
+              <input type="radio" name="plan_pago" value="Completo" checked>
+              <div class="option-content">
+                <span class="plan-title">PAGO COMPLETO</span>
+                <span class="plan-price">$30.00 USD</span>
+                <p style="margin: 6px 0 0 0; font-size: 11px; color: var(--text-muted);">Acceso total sin cuotas
+                  adicionales.</p>
+              </div>
+            </label>
+
+            <label class="plan-option">
+              <input type="radio" name="plan_pago" value="Financiado">
+              <div class="option-content">
+                <span class="plan-title">PLAN FINANCIADO</span>
+                <span class="plan-price">$6.00 Inicial + 3 Cuotas de $8.00</span>
+                <p style="margin: 6px 0 0 0; font-size: 11px; color: var(--text-muted);">Reporta hoy tu inicial y el
+                  resto durante el periodo del evento.</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Caja de términos (para financiamiento) -->
+          <div id="terminos-financiamiento-box" class="hidden"
+            style="margin-top: 20px; padding: 15px; background: rgba(0, 0, 0, 0.02); border: 1px solid var(--border-color); border-radius: 8px;">
+            <label class="checkbox-container"
+              style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; text-transform: none; font-size: 11px; font-weight: normal; color: var(--text-main);">
+              <input type="checkbox" id="acepta_terminos" style="margin-top: 3px;">
+              <span>Acepto y me comprometo a cumplir con el plan de financiamiento para asegurar mi cupo y material de
+                TRD 2026.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- PASO 5: RESUMEN -->
+        <div class="form-step" data-step="5">
+          <div class="step-header">
+            <p>Por favor verifica que toda la información ingresada sea correcta.</p>
+          </div>
+
+          <div class="resumen-box">
+            <div class="resumen-section">
+              <h4>Participante & Sede</h4>
+              <p><strong>Sede:</strong> <span id="resumen-sede">-</span></p>
+              <p><strong>Nombre:</strong> <span id="resumen-nombre">-</span></p>
+              <p><strong>Identificación:</strong> <span id="resumen-cedula">-</span></p>
+              <p><strong>Correo:</strong> <span id="resumen-email">-</span></p>
+              <p><strong>WhatsApp:</strong> <span id="resumen-whatsapp">-</span></p>
+              <p><strong>Edad:</strong> <span id="resumen-edad">-</span></p>
+              <p><strong>Sexo:</strong> <span id="resumen-sexo">-</span></p>
+            </div>
+
+            <div class="resumen-section">
+              <h4>Iglesia y Ministerio</h4>
+              <p><strong>Congregación:</strong> <span id="resumen-iglesia">-</span></p>
+              <p><strong>Pastor:</strong> <span id="resumen-red">-</span></p>
+              <p><strong>Servicio:</strong> <span id="resumen-funcion">-</span></p>
+            </div>
+
+            <div class="resumen-section">
+              <h4>Detalle de Plan</h4>
+              <p><strong>Plan de Pago:</strong> <span id="resumen-plan">-</span></p>
+            </div>
+          </div>
+
+          <!-- Código Promocional -->
+          <div style="margin-top: 20px;">
+            <label for="codigo_promocional" style="display: block; margin-bottom: 8px;">¿Tienes un código promocional?
+              (Opcional)</label>
+            <input type="text" id="codigo_promocional" placeholder="Ingresa tu cupón"
+              style="text-align: center; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; font-weight: bold; letter-spacing: 2px;">
+          </div>
+
+          <button type="submit" class="submit-btn" id="submit-btn" style="margin-top: 30px; background: #2d3e85; color: #ffffff; font-weight: bold;">
+            <span>CONFIRMAR</span>
+          </button>
+        </div>
+
+        <!-- CONTROLES DE NAVEGACIÓN -->
+        <div class="step-controls" style="margin-top: 30px; display: flex; justify-content: space-between; gap: 20px;">
+          <button type="button" class="btn-control" id="prev-btn" style="visibility: hidden;">
+            <i class="fa-solid fa-arrow-left"></i> Anterior
+          </button>
+          <button type="button" class="btn-control primary" id="next-btn">
+            Siguiente <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 5px;">
+      <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> VOLVER</a>
+    </div>
+
+    <footer class="main-footer">
+      <p>2026 Reforma - Luminares <span
+          style="font-size: 10px; color: var(--text-muted); opacity: 0.7; margin-left: 8px;">(v2.2)</span></p>
+    </footer>
+  </div>
+
+  <script src="inscripcion.js?v=3.5"></script>
+</body>
+
+</html>
