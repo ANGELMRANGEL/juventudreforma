@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Reforma · Lanzamiento Oficial TRD 2026</title>
+  <meta name="description" content="Lanzamiento oficial de la nueva plataforma digital de Juventud Reforma en el marco de Luminares TRD 2026.">
+  <meta name="theme-color" content="#0A0A0A">
+  <link rel="canonical" href="https://juventudreforma.com/">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Juventud Reforma">
+  <meta property="og:locale" content="es_VE">
+  <meta property="og:url" content="https://juventudreforma.com/">
+  <meta property="og:title" content="Reforma · Lanzamiento Oficial TRD 2026">
+  <meta property="og:description" content="El ser antes que el hacer. Apertura oficial este viernes 9 de octubre a las 5:00 PM.">
+  <meta property="og:image" content="https://juventudreforma.com/assets/img/luminares_og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Google Fonts: JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --ink: #080808;
+      --surface: #111111;
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --cream: #F5F5F3;
+      --muted: #8E8E93;
+      --faint: #5A5A5E;
+      --line-dark: rgba(255, 255, 255, 0.08);
+      --line-subtle: rgba(255, 255, 255, 0.16);
+      --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', 'Arial Black', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --glow: rgba(255, 255, 255, 0.06);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+      background-color: var(--ink);
+      background-image: 
+        radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+        radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 40%);
+      color: var(--cream);
+      font-family: var(--font-display);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* TOP BAR */
+    .rf-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(12px, 2vh, 20px) clamp(16px, 4vw, 48px);
+      flex-shrink: 0;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      z-index: 10;
+    }
+
+    .rf-logo-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .rf-logo-link:hover {
+      opacity: .8;
+    }
+
+    .rf-logo-img {
+      height: clamp(16px, 2.2vh, 22px);
+      width: auto;
+      display: block;
+      filter: brightness(1.1);
+    }
+
+    .rf-badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--surface-border);
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: clamp(8.5px, 0.85vw, 10px);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .rf-badge-pulse {
+      width: 6px;
+      height: 6px;
+      background: #34C759;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34C759;
+      animation: rfPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes rfPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(0.85); }
+    }
+
+    /* CINTA TICKER */
+    .rf-cinta {
+      border-top: 1px solid var(--line-dark);
+      border-bottom: 1px solid var(--line-dark);
+      padding: clamp(6px, 0.9vh, 9px) 0;
+      overflow: hidden;
+      flex-shrink: 0;
+      white-space: nowrap;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(8px);
+    }
+
+    .rf-cinta-track {
+      display: flex;
+      gap: clamp(24px, 3.5vw, 44px);
+      padding-left: clamp(16px, 3vw, 40px);
+      font-family: var(--font-mono);
+      font-size: clamp(8px, 0.85vw, 9.5px);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--faint);
+      animation: rfTicker 35s linear infinite;
+    }
+
+    .rf-cinta-track span.bullet {
+      color: var(--line-subtle);
+    }
+
+    .rf-cinta-bottom {
+      border-top: 1px solid var(--line-dark);
+      border-bottom: 1px solid var(--line-dark);
+      background: rgba(17, 17, 17, 0.6);
+    }
+
+    .rf-cinta-bottom .rf-cinta-track {
+      color: var(--muted);
+      animation: rfTicker 28s linear infinite;
+    }
+
+    .rf-cinta-bottom .rf-cinta-track strong {
+      color: var(--cream);
+      font-weight: 700;
+    }
+
+    @keyframes rfTicker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* MAIN HERO STAGE */
+    .rf-stage {
+      position: relative;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(8px, 1.5vh, 18px) clamp(16px, 3vw, 32px);
+      max-width: 880px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+      z-index: 5;
+    }
+
+    .rf-cross {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      opacity: .2;
+      color: var(--cream);
+      pointer-events: none;
+    }
+    .rf-cross.top-left { top: clamp(4px, 1vh, 12px); left: clamp(8px, 1.5vw, 20px); }
+    .rf-cross.top-right { top: clamp(4px, 1vh, 12px); right: clamp(8px, 1.5vw, 20px); }
+    .rf-cross.bottom-left { bottom: clamp(4px, 1vh, 12px); left: clamp(8px, 1.5vw, 20px); }
+    .rf-cross.bottom-right { bottom: clamp(4px, 1vh, 12px); right: clamp(8px, 1.5vw, 20px); }
+
+    .rf-tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: clamp(8px, 0.95vw, 9.5px);
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: clamp(6px, 1.2vh, 14px);
+    }
+
+    /* LOGOS */
+    .rf-logos-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(4px, 0.8vh, 8px);
+      margin-bottom: clamp(8px, 1.4vh, 16px);
+    }
+
+    .rf-trd-logo {
+      height: clamp(20px, 3vh, 28px);
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+    }
+
+    .rf-lns-logo {
+      max-height: clamp(38px, 5.5vh, 56px);
+      width: auto;
+      max-width: 85vw;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 18px rgba(255, 255, 255, 0.08));
+    }
+
+    /* CONTRAST STRIP: EL SER ANTES QUE EL HACER */
+    .rf-ser-hacer-strip {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: clamp(10px, 1.8vw, 20px);
+      padding: clamp(8px, 1.3vh, 14px) 0;
+      border-top: 1px solid var(--line-dark);
+      border-bottom: 1px solid var(--line-dark);
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: clamp(8px, 1.4vh, 14px);
+    }
+
+    .rf-ser-word {
+      font-size: clamp(22px, 4.2vw, 42px);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--cream);
+      text-shadow: 0 0 24px rgba(255, 255, 255, 0.2);
+    }
+
+    .rf-middle-word {
+      font-family: var(--font-mono);
+      font-size: clamp(8.5px, 0.95vw, 10.5px);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .rf-hacer-word {
+      font-size: clamp(22px, 4.2vw, 42px);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1.2px rgba(245, 245, 243, 0.45);
+      transition: all .3s ease;
+    }
+
+    .rf-ser-hacer-strip:hover .rf-hacer-word {
+      -webkit-text-stroke-color: rgba(245, 245, 243, 0.7);
+    }
+
+    .rf-lead-copy {
+      font-size: clamp(12px, 1.25vw, 14px);
+      line-height: 1.6;
+      color: rgba(245, 245, 243, 0.72);
+      max-width: 54ch;
+      margin: 0 auto clamp(10px, 1.8vh, 18px);
+      text-wrap: pretty;
+      font-weight: 400;
+    }
+
+    /* COUNTDOWN EDITORIAL GRID */
+    .rf-countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--line-dark);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.015);
+      backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: clamp(10px, 1.8vh, 18px);
+      box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    .rf-count-col {
+      padding: clamp(8px, 1.4vh, 14px) clamp(6px, 1vw, 12px);
+      border-right: 1px solid var(--line-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .rf-count-col:last-child {
+      border-right: none;
+    }
+
+    .rf-count-num {
+      font-family: var(--font-mono);
+      font-size: clamp(22px, 3.4vw, 36px);
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .rf-count-lbl {
+      font-family: var(--font-mono);
+      font-size: clamp(7.5px, 0.8vw, 9px);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    /* METADATA STRIP */
+    .rf-meta-strip {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: clamp(8.5px, 0.9vw, 10.5px);
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: clamp(12px, 2.2vh, 22px);
+      padding: 6px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--surface-border);
+      border-radius: 9999px;
+    }
+
+    .rf-meta-strip strong {
+      color: var(--cream);
+      font-weight: 600;
+    }
+
+    .rf-meta-strip .dot {
+      color: var(--line-subtle);
+    }
+
+    /* CTA BUTTON */
+    .rf-cta-row {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .rf-btn-pill-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      height: clamp(42px, 5vh, 48px);
+      padding: 0 clamp(24px, 3.5vw, 42px);
+      background: var(--cream);
+      color: var(--ink);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: clamp(9.5px, 1vw, 11px);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      transition: all .25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .rf-btn-pill-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      background: #FFFFFF;
+      color: #000;
+      box-shadow: 0 0 35px rgba(255, 255, 255, 0.28), 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+    }
+
+    .rf-btn-pill-primary:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .rf-btn-pill-primary i {
+      font-size: 11px;
+      transition: transform .2s ease;
+    }
+
+    .rf-btn-pill-primary:hover i {
+      transform: translateX(3px);
+    }
+
+    /* FOOTER */
+    .rf-footer {
+      flex-shrink: 0;
+      padding: clamp(8px, 1.2vh, 12px) clamp(16px, 4vw, 48px);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px 20px;
+      border-top: 1px solid var(--line-dark);
+      background: var(--ink);
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .rf-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .rf-footer-text,
+    .rf-footer-coords {
+      font-family: var(--font-mono);
+      font-size: clamp(8px, 0.8vw, 9.5px);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin: 0;
+    }
+
+    .rf-footer-admin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: clamp(8px, 0.8vw, 9.5px);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--faint);
+      text-decoration: none;
+      transition: color .2s ease;
+      opacity: 0.6;
+    }
+
+    .rf-footer-admin-link:hover {
+      color: var(--cream);
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      .rf-top-bar {
+        padding: 10px 16px;
+      }
+      .rf-ser-hacer-strip {
+        gap: 8px;
+        padding: 6px 0;
+      }
+      .rf-lead-copy {
+        font-size: 11px;
+        line-height: 1.45;
+      }
+      .rf-meta-strip {
+        font-size: 8px;
+        letter-spacing: .08em;
+        padding: 4px 10px;
+      }
+      .rf-footer {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        gap: 6px;
+        padding: 8px 12px;
+      }
+      .rf-footer-left {
+        flex-direction: column;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV SUPERIOR -->
+  <header class="rf-top-bar">
+    <a href="/index.html?preview=1" id="rf-secret-bypass" class="rf-logo-link" title="REFORMA">
+      <img src="assets/img/home/logo-blanco.png" alt="REFORMA" class="rf-logo-img">
+    </a>
+    <div class="rf-badge-status">
+      <span class="rf-badge-pulse"></span>
+      <span>PRELANZAMIENTO OFICIAL</span>
+    </div>
+  </header>
+
+  <!-- CINTA 1: VALORES -->
+  <div class="rf-cinta" aria-hidden="true">
+    <div class="rf-cinta-track">
+      <span>● Identidad</span><span>● Propósito</span><span>● Verdad</span><span>● Reforma</span><span>● Liderazgo</span><span>● Luminares TRD 2026</span><span>● Maracay</span><span>● Identidad</span><span>● Propósito</span><span>● Verdad</span><span>● Reforma</span><span>● Liderazgo</span>
+    </div>
+  </div>
+
+  <!-- HERO STAGE -->
+  <main class="rf-stage">
+    <!-- Retícula editorial: cruces de esquina -->
+    <svg class="rf-cross top-left" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0v14M0 7h14" stroke="currentColor" stroke-width="1"></path></svg>
+    <svg class="rf-cross top-right" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0v14M0 7h14" stroke="currentColor" stroke-width="1"></path></svg>
+    <svg class="rf-cross bottom-left" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0v14M0 7h14" stroke="currentColor" stroke-width="1"></path></svg>
+    <svg class="rf-cross bottom-right" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0v14M0 7h14" stroke="currentColor" stroke-width="1"></path></svg>
+
+    <div class="rf-tagline">
+      <i class="fa-solid fa-bolt" style="font-size: 8px; opacity: 0.8;"></i>
+      <span>Sin religiosidad · Sin máscaras · Solo entrenamiento real</span>
+    </div>
+
+    <!-- Logos TRD y Luminares -->
+    <div class="rf-logos-row">
+      <img src="/assets/img/trd2026.png" alt="TRD 2026" class="rf-trd-logo">
+      <img src="/assets/img/lns_long.png" alt="Luminares" class="rf-lns-logo">
+    </div>
+
+    <!-- Contraste de método: El ser antes que el hacer -->
+    <div class="rf-ser-hacer-strip">
+      <div class="rf-ser-word">El ser</div>
+      <div class="rf-middle-word">antes que</div>
+      <div class="rf-hacer-word">El hacer</div>
+    </div>
+
+    <p class="rf-lead-copy">
+      Servir no es una opción, es el compromiso de esta generación. Apertura oficial de la nueva plataforma digital en el marco de Luminares TRD 2026.
+    </p>
+
+    <!-- Countdown Hairline Grid -->
+    <section class="rf-countdown-grid" aria-label="Cuenta regresiva para el lanzamiento">
+      <div class="rf-count-col">
+        <span class="rf-count-num" id="days">00</span>
+        <span class="rf-count-lbl">Días</span>
+      </div>
+      <div class="rf-count-col">
+        <span class="rf-count-num" id="hours">00</span>
+        <span class="rf-count-lbl">Horas</span>
+      </div>
+      <div class="rf-count-col">
+        <span class="rf-count-num" id="minutes">00</span>
+        <span class="rf-count-lbl">Minutos</span>
+      </div>
+      <div class="rf-count-col">
+        <span class="rf-count-num" id="seconds">00</span>
+        <span class="rf-count-lbl">Segundos</span>
+      </div>
+    </section>
+
+    <!-- Event Metadata Ribbon -->
+    <div class="rf-meta-strip">
+      <span>Viernes, <strong>9 de Octubre 2026</strong></span>
+      <span class="dot">·</span>
+      <span><strong>5:00 PM</strong> (GMT-4)</span>
+      <span class="dot">·</span>
+      <span>Sede La Fuente, <strong>Maracay</strong></span>
+    </div>
+
+    <!-- Action Button -->
+    <div class="rf-cta-row">
+      <a href="/trd26/" class="rf-btn-pill-primary">
+        <span>QUIERO PARTICIPAR EN TRD 2026</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </main>
+
+  <!-- CINTA 2: METRICAS EN PALETA MONOCROMÁTICA / DARK LUXURY -->
+  <div class="rf-cinta rf-cinta-bottom" aria-hidden="true">
+    <div class="rf-cinta-track">
+      <span><strong>+3.5K</strong> reformadores</span><span class="bullet">●</span><span><strong>4.9/5</strong> calificación</span><span class="bullet">●</span><span><strong>230</strong> reseñas verificadas</span><span class="bullet">●</span><span><strong>10</strong> programas</span><span class="bullet">●</span><span>Apertura Luminares TRD 2026</span><span class="bullet">●</span><span><strong>+3.5K</strong> reformadores</span><span class="bullet">●</span><span><strong>4.9/5</strong></span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="rf-footer">
+    <div class="rf-footer-left">
+      <p class="rf-footer-text">&copy; 2026 REFORMA · TODOS LOS DERECHOS RESERVADOS</p>
+      <p class="rf-footer-coords">LUMINARES TRD 2026 // 10.2469&deg; N, 67.5958&deg; W</p>
+    </div>
+    <a href="/admin-login.html" class="rf-footer-admin-link" title="Acceso administrativo">
+      <i class="fa-solid fa-lock"></i>
+      <span>Acceso Admin</span>
+    </a>
+  </footer>
+
+  <script>
+    (function () {
+      // Fecha objetivo: Viernes 9 de Octubre 2026 a las 17:00:00 hora de Venezuela (UTC-4)
+      var targetDate = new Date('2026-10-09T17:00:00-04:00').getTime();
+
+      var daysEl = document.getElementById('days');
+      var hoursEl = document.getElementById('hours');
+      var minutesEl = document.getElementById('minutes');
+      var secondsEl = document.getElementById('seconds');
+
+      function padZero(num) {
+        return num < 10 ? '0' + num : String(num);
+      }
+
+      function updateCountdown() {
+        var now = new Date().getTime();
+        var diff = targetDate - now;
+
+        if (diff <= 0) {
+          daysEl.textContent = '00';
+          hoursEl.textContent = '00';
+          minutesEl.textContent = '00';
+          secondsEl.textContent = '00';
+          return;
+        }
+
+        var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        daysEl.textContent = padZero(days);
+        hoursEl.textContent = padZero(hours);
+        minutesEl.textContent = padZero(minutes);
+        secondsEl.textContent = padZero(seconds);
+      }
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+
+      var secretLogo = document.getElementById('rf-secret-bypass');
+      if (secretLogo) {
+        secretLogo.addEventListener('click', function () {
+          document.cookie = "rf_preview=1; path=/; max-age=86400";
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
